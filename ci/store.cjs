@@ -1,0 +1,14 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const [directory, image, repository, revision] = process.argv.slice(2);
+if (!directory || !/^ghcr\.io\/[a-z0-9_.-]+\/[a-z0-9_.-]+$/.test(image) || !/^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/.test(repository) || !/^[a-f0-9]{40}$/.test(revision)) throw Error('Invalid publication metadata');
+const config = JSON.parse(fs.readFileSync('meine_kleidung/config.json', 'utf8'));
+config.image = image;
+config.url = `https://github.com/${repository}`;
+const target = path.join(directory, 'meine_kleidung');
+fs.mkdirSync(target, { recursive: true });
+fs.writeFileSync(path.join(target, 'config.json'), JSON.stringify(config, null, 2) + '\n');
+fs.writeFileSync(path.join(directory, 'repository.json'), JSON.stringify({ name: 'Meine Kleidung', url: `https://github.com/${repository}`, maintainer: repository.split('/')[0] }, null, 2) + '\n');
+for (const name of ['DOCS.md', 'CHANGELOG.md']) fs.copyFileSync(path.join('meine_kleidung', name), path.join(target, name));
+fs.copyFileSync('meine_kleidung/LICENSE', path.join(directory, 'LICENSE'));
+fs.writeFileSync(path.join(directory, 'README.md'), `# Meine Kleidung für Home Assistant\n\nVersion ${config.version}.\n\nInstallationsquelle: https://github.com/${repository}#ha-store\n\n[Vollständiger Quellcode dieser Version](https://github.com/${repository}/tree/${revision})\n\n[Installation und Sicherung](meine_kleidung/DOCS.md)\n`);

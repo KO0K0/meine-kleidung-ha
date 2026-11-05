@@ -1,0 +1,152 @@
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Post,
+  Get,
+  Query,
+  Render,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { ConditionalAuthGuard } from '../auth/conditional-auth.guard';
+import { Payload } from '../auth/dto/payload.dto';
+import {
+  temperatureUnitFromAcceptLanguage,
+  usesTwelveHourClock,
+} from '../weather/temperature-unit.util';
+import { CalendarService } from './calendar.service';
+
+@UseGuards(ConditionalAuthGuard)
+@Controller('calendar')
+export class CalendarController {
+  constructor(private readonly calendarService: CalendarService) {}
+
+  private userId(req: FastifyRequest): number | undefined {
+    return (req['user'] as Payload | undefined)?.userId;
+  }
+
+  /** Accept-Language header normalized to a plain string (or undefined). */
+  private acceptLanguage(req: FastifyRequest): string | undefined {
+    const header = req.headers['accept-language'];
+    return typeof header === 'string' ? header : undefined;
+  }
+
+  @Get()
+  @Render('calendar/index')
+  async index(
+    @Query('week') weekParam: string | undefined,
+    @Query('calMonth') calMonthParam: string | undefined,
+    @Query('lat') latParam: string | undefined,
+    @Query('lon') lonParam: string | undefined,
+    @Req() req: FastifyRequest,
+    @I18n() i18n: I18nContext,
+  ) {
+    const lat = latParam != null ? parseFloat(latParam) : undefined;
+    const lon = lonParam != null ? parseFloat(lonParam) : undefined;
+    const acceptLanguage = this.acceptLanguage(req);
+    return this.calendarService.buildIndexViewModel(
+      weekParam,
+      calMonthParam,
+      this.userId(req),
+      i18n,
+      Number.isFinite(lat) ? lat : undefined,
+      Number.isFinite(lon) ? lon : undefined,
+      temperatureUnitFromAcceptLanguage(acceptLanguage),
+    );
+  }
+
+  @Get('weather')
+  async weatherDetails(
+    @Query('date') dateParam: string | undefined,
+    @Query('lat') latParam: string | undefined,
+    @Query('lon') lonParam: string | undefined,
+    @Req() req: FastifyRequest,
+    @Res() reply: FastifyReply,
+    @I18n() i18n: I18nContext,
+  ) {
+    const lat = latParam != null ? parseFloat(latParam) : undefined;
+    const lon = lonParam != null ? parseFloat(lonParam) : undefined;
+    const acceptLanguage = this.acceptLanguage(req);
+    const viewModel = await this.calendarService.buildWeatherModalViewModel(
+      dateParam,
+      Number.isFinite(lat) ? lat : undefined,
+      Number.isFinite(lon) ? lon : undefined,
+      i18n,
+      temperatureUnitFromAcceptLanguage(acceptLanguage),
+      usesTwelveHourClock(acceptLanguage),
+      acceptLanguage,
+    );
+    return reply.viewPartial('calendar/weather_modal', viewModel);
+  }
+
+  @Post()
+  async create(
+    @Body()
+    body: { date: string; outfitId: string; notes?: string; week?: string },
+    @Req() req: FastifyRequest,
+    @Res() reply: FastifyReply,
+  ) {
+    await this.calendarService.create(
+      {
+        date: new Date(body.date),
+        outfitId: Number(body.outfitId),
+        notes: body.notes,
+      },
+      this.userId(req),
+    );
+    if (req.headers['hx-request'] === 'true') {
+      return reply.status(204).send();
+    }
+    return reply.redirect(`/calendar?week=${body.week ?? body.date}`, 302);
+  }
+
+  @Post(':id/delete')
+  @HttpCode(200)
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { week?: string },
+    @Req() req: FastifyRequest,
+    @Res() reply: FastifyReply,
+  ) {
+    await this.calendarService.remove(id, this.userId(req));
+    reply.header('HX-Redirect', `/calendar?week=${body.week ?? ''}`);
+    return reply.send();
+  }
+
+  @Post(':id/worn')
+  async toggleWorn(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { week?: string },
+    @Req() req: FastifyRequest,
+    @Res() reply: FastifyReply,
+    @I18n() i18n: I18nContext,
+  ) {
+    const entry = await this.calendarService.toggleWorn(id, this.userId(req));
+    const week = body.week ?? '';
+
+    if (req.headers['hx-request']) {
+      const isWorn = !!entry.wornAt;
+      const btnClass = isWorn
+        ? 'bg-success text-success-content'
+        : 'text-base-content/40 italic font-normal hover:text-base-content/70';
+      const label = isWorn
+        ? `✓ ${i18n.t('lang.CALENDAR_WORN')}`
+        : i18n.t('lang.CALENDAR_MARK_WORN_PROMPT');
+      return reply.viewPartial('partials/calendar_worn_button', {
+        entryId: id,
+        week,
+        btnClass,
+        label,
+      });
+    }
+
+    // Non-HTMX fallback: full redirect
+    return reply.redirect(`/calendar?week=${week}`, 303);
+  }
+}

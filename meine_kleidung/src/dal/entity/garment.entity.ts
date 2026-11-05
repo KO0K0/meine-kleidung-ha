@@ -1,0 +1,69 @@
+import {
+  Collection,
+  Entity,
+  Enum,
+  ManyToMany,
+  ManyToOne,
+  OneToOne,
+  OptionalProps,
+  PrimaryKey,
+  Property,
+  type Ref,
+} from '@mikro-orm/core';
+import { File } from './file.entity';
+import { Outfit } from './outfit.entity';
+import { ShareableId } from './shareableId.entity';
+import { User } from './user.entity';
+import { GarmentColor } from '../../wardrobe/garment-color.enum';
+
+export { GarmentColor };
+
+@Entity()
+export class Garment extends ShareableId {
+  [OptionalProps]?: 'archived';
+  @PrimaryKey()
+  public id!: number;
+
+  @Property({ nullable: true })
+  public name?: string;
+
+  @Property()
+  public category!: string;
+
+  @Enum({ items: () => GarmentColor, nullable: true })
+  public color?: string;
+
+  @Property({ nullable: true })
+  public brand?: string;
+
+  @Property({ nullable: true })
+  public size?: string;
+
+  @Property({ type: Date, nullable: true })
+  public dateAquired?: Date;
+
+  @Property({ nullable: true })
+  public notes?: string;
+
+  @Property({ default: false })
+  public archived = false;
+  @Property({ nullable: true, columnType: 'text' })
+  public washingDetails?: string;
+
+  @OneToOne({
+    entity: () => File,
+    nullable: true,
+  })
+  public photo?: File;
+
+  @ManyToOne({
+    entity: () => User,
+    deleteRule: 'cascade',
+    ref: true,
+    nullable: true,
+  })
+  public owner?: Ref<User>;
+
+  @ManyToMany(() => Outfit, (outfit) => outfit.garments)
+  public outfits = new Collection<Outfit>(this);
+}

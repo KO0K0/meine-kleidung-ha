@@ -1,0 +1,12 @@
+**/node_modules/
+**/.env
+**/.env.*
+**/data/
+**/Meine-Daten/
+**/dist/
+**/coverage/
+**/*.db
+**/*.db-*
+**/*.log
+**/app-secret
+**/*smoke-state*

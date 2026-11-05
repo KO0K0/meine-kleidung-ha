@@ -1,0 +1,105 @@
+name: Build, test and publish HA app
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ha-release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read release metadata
+        id: meta
+        run: |
+          VERSION=$(node -p "require('./meine_kleidung/config.json').version")
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+      - name: Sign in to package registry
+        env:
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$REGISTRY_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+      - name: Build or reuse immutable release
+        env:
+          IMAGE: ${{ steps.meta.outputs.image }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          if docker manifest inspect "$IMAGE:$VERSION" >/dev/null 2>&1; then
+            docker pull "$IMAGE:$VERSION"
+            REVISION=$(docker inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' "$IMAGE:$VERSION")
+            if [ "$REVISION" != "$GITHUB_SHA" ]; then
+              echo 'Version already exists for different source. Increase version in config.json.'
+              exit 1
+            fi
+            docker tag "$IMAGE:$VERSION" closet-candidate
+          else
+            docker build --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" --label "org.opencontainers.image.revision=$GITHUB_SHA" --label 'org.opencontainers.image.licenses=AGPL-3.0-only' -t closet-candidate meine_kleidung
+          fi
+      - name: Test login, stock and persistence across restart
+        run: |
+          mkdir -p "$RUNNER_TEMP/closet-data"
+          printf '%s' '{"allow_registration":true,"site_url":"http://127.0.0.1:3088"}' > "$RUNNER_TEMP/closet-data/options.json"
+          docker run -d --name closet-test -p 127.0.0.1:3088:3000 -v "$RUNNER_TEMP/closet-data:/data" closet-candidate
+          node ci/smoke.cjs init "$RUNNER_TEMP/closet-smoke.json"
+          printf '%s' '{"allow_registration":false,"site_url":"http://127.0.0.1:3088"}' > "$RUNNER_TEMP/closet-data/options.json"
+          docker restart closet-test
+          node ci/smoke.cjs verify "$RUNNER_TEMP/closet-smoke.json"
+      - name: Publish tested image
+        env:
+          IMAGE: ${{ steps.meta.outputs.image }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          docker tag closet-candidate "$IMAGE:$VERSION"
+          docker push "$IMAGE:$VERSION"
+      - name: Verify package is publicly downloadable
+        env:
+          IMAGE: ${{ steps.meta.outputs.image }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          ANONYMOUS_CONFIG=$(mktemp -d)
+          if ! docker --config "$ANONYMOUS_CONFIG" pull "$IMAGE:$VERSION"; then
+            echo 'Make the GitHub container package public in its Package settings, then rerun this workflow for the same commit.'
+            exit 1
+          fi
+      - name: Update Home Assistant repository after successful tests
+        env:
+          IMAGE: ${{ steps.meta.outputs.image }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          STORE="$RUNNER_TEMP/ha-store"
+          git init "$STORE"
+          git -C "$STORE" config user.name 'github-actions[bot]'
+          git -C "$STORE" config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          gh auth setup-git
+          git -C "$STORE" remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
+          if git -C "$STORE" fetch origin ha-store; then
+            git -C "$STORE" checkout -b ha-store FETCH_HEAD
+          else
+            git -C "$STORE" checkout --orphan ha-store
+          fi
+          node ci/store.cjs "$STORE" "$IMAGE" "$GITHUB_REPOSITORY" "$GITHUB_SHA"
+          git -C "$STORE" add .
+          if ! git -C "$STORE" diff --cached --quiet; then
+            git -C "$STORE" commit -m "Release Meine Kleidung $VERSION"
+            git -C "$STORE" push origin ha-store
+          fi
+      - name: Test container logs on failure
+        if: failure()
+        run: docker logs --tail 100 closet-test 2>/dev/null || true
+      - name: Stop disposable test container
+        if: always()
+        run: docker rm -f closet-test 2>/dev/null || true

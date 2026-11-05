@@ -1,0 +1,290 @@
+<link rel="stylesheet" href="/css/inventory.css" />
+<main class="closet" hx-boost="false">
+  <header class="closet-header">
+    <div>
+      <p class="eyebrow">LIBRE CLOSET · DEIN BESTAND</p>
+      <h1>Meine Kleidung</h1>
+      <p>Deine Kleidung nach Ort und Verfügbarkeit.</p>
+    </div>
+    <div class="closet-header-actions">
+      <button
+        id="open-voice"
+        type="button"
+        aria-label="Sprachliste öffnen"
+        title="Sprachliste"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="9" y="2" width="6" height="12" rx="3" />
+          <path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8" />
+        </svg>
+      </button>
+      <a class="primary" href="/wardrobe/new">＋ Artikel hinzufügen</a>
+    </div>
+  </header>
+  <nav class="closet-tabs" aria-label="Kleidungsverwaltung">
+    <button data-tab="all" aria-pressed="true">Übersicht</button>
+    <button data-tab="laundry" aria-pressed="false">
+      Wäsche <span id="laundry-count">0</span>
+    </button>
+    <button data-tab="luggage" aria-pressed="false">Gepäck</button>
+    <button data-tab="places" aria-pressed="false">Orte</button>
+  </nav>
+  <p id="inventory-message" role="status" aria-live="polite"></p>
+  <button id="undo-action" type="button" hidden>Rückgängig</button>
+  <section id="inventory-content">
+    <div class="closet-stats" id="inventory-stats"></div>
+    <div class="closet-filters">
+      <label class="search-label"
+        >Suche<input
+          id="inventory-search"
+          type="search"
+          placeholder="Name, Marke, Größe, Farbe …"
+      /></label>
+      <label
+        >Ort<select id="inventory-location">
+          <option value="">Alle Orte</option>
+        </select></label
+      >
+      <label
+        >Kategorie<select id="inventory-category">
+          <option value="">Alle Kategorien</option>
+        </select></label
+      >
+      <label
+        >Status<select id="inventory-status">
+          <option value="">Alle</option>
+          <option value="available">Verfügbar</option>
+          <option value="laundry">In der Wäsche</option>
+        </select></label
+      >
+    </div>
+    <div class="selection-bar">
+      <label
+        ><input type="checkbox" id="select-visible" /> Sichtbare Bestände
+        auswählen</label
+      >
+      <button id="refresh-inventory" type="button">Aktualisieren</button>
+    </div>
+    <div id="inventory-grid" class="closet-grid" aria-live="polite"></div>
+    <div class="batch-bar" id="batch-bar" hidden>
+      <strong id="selection-count"></strong>
+      <button
+        id="clear-selection"
+        type="button"
+        aria-label="Auswahl aufheben"
+        title="Auswahl aufheben"
+      >
+        ×
+      </button>
+      <button id="wash-selection">In die Wäsche</button>
+      <button id="clean-selection">Wieder verfügbar</button>
+      <label>Zielort<select id="move-destination"></select></label>
+      <button id="move-selection" class="primary">Verschieben</button>
+    </div>
+  </section>
+  <section id="inventory-places" hidden>
+    <h2>Deine Orte</h2>
+    <p>
+      Namen kannst du jederzeit ändern. Die zugeordneten Mengen bleiben
+      erhalten.
+    </p>
+    <div id="place-list"></div>
+    <form id="add-place">
+      <label
+        >Weiterer Ort<input
+          name="name"
+          maxlength="60"
+          required
+          placeholder="Zum Beispiel Ferienwohnung" /></label
+      ><button class="primary">Ort hinzufügen</button>
+    </form>
+  </section>
+  <details class="backup-tools">
+    <summary>Sicherung &amp; Import</summary>
+    <p>
+      Eine Sicherung enthält deinen Bestand mit Fotos. Importiere sie in einen
+      leeren Bestand.
+    </p>
+    <a class="primary" href="/inventory/backup" download
+      >Sicherung herunterladen</a
+    >
+    <form id="backup-import">
+      <label
+        >Sicherungsdatei<input
+          type="file"
+          id="backup-file"
+          accept=".json,application/json"
+          required
+      /></label>
+      <button type="submit">Importieren</button>
+    </form>
+  </details>
+  <footer>
+    Basierend auf
+    <a
+      href="https://github.com/Lazztech/Libre-Closet"
+      target="_blank"
+      rel="noopener"
+      >Libre Closet</a
+    >
+    {{#if authEnabled}} · <a href="/auth/profile">Konto</a>{{/if}}
+  </footer>
+  <div class="scroll-tools" aria-label="Schnellnavigation">
+    <button
+      id="floating-search-button"
+      type="button"
+      popovertarget="floating-search-panel"
+      aria-label="Suche öffnen"
+      title="Suche öffnen"
+      hidden
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="10.5" cy="10.5" r="6.5" />
+        <path d="m16 16 4 4" />
+      </svg>
+    </button>
+    <button
+      id="back-to-top"
+      type="button"
+      aria-label="Nach ganz oben"
+      title="Nach ganz oben"
+      hidden
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 19V5m-6 6 6-6 6 6" />
+      </svg>
+    </button>
+  </div>
+  <div id="floating-search-panel" class="floating-search-panel" popover>
+    <label
+      >Suche<input
+        id="floating-search"
+        type="search"
+        placeholder="Name, Marke, Größe, Farbe …"
+        autofocus
+    /></label>
+    <button
+      type="button"
+      popovertarget="floating-search-panel"
+      popovertargetaction="hide"
+      aria-label="Suche schließen"
+    >
+      ×
+    </button>
+  </div>
+</main>
+<dialog
+  id="move-preview"
+  class="stock-dialog"
+  aria-labelledby="move-preview-title"
+  hx-boost="false"
+>
+  <form method="dialog">
+    <header>
+      <h2 id="move-preview-title">Verschieben</h2>
+      <button value="cancel" aria-label="Schließen">×</button>
+    </header>
+    <p id="move-preview-target"></p>
+    <ul id="move-preview-entries"></ul>
+    <button class="primary" value="confirm">Jetzt verschieben</button>
+  </form>
+</dialog>
+<dialog
+  id="garment-menu"
+  class="stock-dialog garment-menu"
+  aria-labelledby="garment-menu-title"
+  hx-boost="false"
+>
+  <header>
+    <h2 id="garment-menu-title"></h2>
+    <form method="dialog"><button aria-label="Schließen">×</button></form>
+  </header>
+  <div class="garment-menu-actions">
+    <button type="button" id="garment-menu-stock">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 7h16v13H4zM3 4h18v3H3zM10 11h4" />
+      </svg>
+      Mengen &amp; Orte
+    </button>
+    <a id="garment-menu-details">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 7h4l2-3h4l2 3h4v13H4z" />
+        <circle cx="12" cy="13" r="3" />
+      </svg>
+      Details &amp; Foto
+    </a>
+  </div>
+</dialog>
+<dialog
+  id="stock-dialog"
+  class="stock-dialog"
+  aria-labelledby="stock-title"
+  hx-boost="false"
+>
+  <form id="stock-form">
+    <header>
+      <h2 id="stock-title">Mengen verteilen</h2>
+      <button type="button" id="close-stock" aria-label="Schließen">×</button>
+    </header>
+    <p id="stock-instruction">Mit − Stücke abziehen und mit + neu zuweisen.</p>
+    <p id="stock-pool" aria-live="polite"></p>
+    <div class="stock-head">
+      <span>Ort</span><span>Verfügbar</span><span>Wäsche</span>
+    </div>
+    <div id="stock-inputs"></div>
+    <label class="stock-correction">
+      <input id="stock-correction" type="checkbox" /> Gesamtzahl korrigieren
+    </label>
+    <p id="stock-error" role="alert"></p>
+    <button id="stock-save" class="primary" type="submit">
+      Verteilung speichern
+    </button>
+  </form>
+</dialog>
+<dialog
+  id="voice-dialog"
+  class="stock-dialog"
+  aria-labelledby="voice-title"
+  hx-boost="false"
+>
+  <header>
+    <h2 id="voice-title">Sprachliste</h2>
+    <button id="close-voice" type="button" aria-label="Schließen">×</button>
+  </header>
+  <div class="voice-places">
+    <label>Von<select id="voice-source"></select></label>
+    <label>Nach<select id="voice-target"></select></label>
+  </div>
+  <div class="voice-route-tools">
+    <button
+      id="voice-swap"
+      type="button"
+      title="Richtung umkehren"
+      aria-label="Richtung umkehren"
+    >
+      ⇄
+    </button>
+    <button id="voice-save-route" type="button">Richtung merken</button>
+  </div>
+  <div id="voice-routes" aria-label="Gespeicherte Ortsrichtungen"></div>
+  <label for="voice-text">Artikel diktieren oder schreiben</label>
+  <textarea
+    id="voice-text"
+    rows="4"
+    placeholder="Zwei Zip-Hoodies, ein T-Shirt, Strümpfe"
+  ></textarea>
+  <p class="voice-hint">
+    Tippe ins Textfeld und nutze das Mikrofon deiner iPhone-Tastatur oder unter
+    Windows die Windows-Taste + H. Trenne Artikel mit „Komma“ oder einer neuen
+    Zeile. Ohne Mengenangabe wird ein Stück ausgewählt. Es zählen nur verfügbare
+    Artikel am Startort.
+  </p>
+  <button id="voice-match" type="button">Artikel zuordnen</button>
+  <p id="voice-error" role="status" aria-live="polite"></p>
+  <div id="voice-results"></div>
+  <button id="voice-confirm" class="primary" type="button" disabled>
+    Jetzt verschieben
+  </button>
+</dialog>
+<script src="/js/voice-list.js" defer></script>
+<script src="/js/inventory.js" defer></script>
