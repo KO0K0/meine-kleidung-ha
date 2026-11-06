@@ -14,12 +14,12 @@ async function ready() {
   await ready();
   assert.equal((await fetch(base + '/inventory/data', { redirect: 'manual' })).status, 302);
   if (mode === 'init') {
-    const password = randomBytes(24).toString('hex');
+    const password = 'Test1-' + randomBytes(24).toString('hex');
     const response = await fetch(base + '/auth/register', { method: 'POST', redirect: 'manual', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ email: 'container-test@example.com', password, confirmPassword: password }) });
-    assert.equal(response.status, 302);
+    assert.equal(response.status, 302, 'Registration must succeed');
     const cookie = response.headers.get('set-cookie')?.split(';')[0]; assert(cookie);
     const created = await fetch(base + '/wardrobe', { method: 'POST', redirect: 'manual', headers: { Cookie: cookie, 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ name: 'Container-Test', category: 'Kleidung' }) });
-    assert.equal(created.status, 302);
+    assert.equal(created.status, 302, 'Garment creation must succeed');
     const snapshot = await (await fetch(base + '/inventory/data', { headers: { Cookie: cookie } })).json();
     const garment = snapshot.garments.find(g => g.name === 'Container-Test'); assert(garment);
     const changed = await fetch(base + '/inventory/actions', { method: 'POST', headers: { Cookie: cookie, 'Content-Type': 'application/json', 'X-Inventory-Request': '1' }, body: JSON.stringify({ type: 'stock', revision: snapshot.revision, garmentId: garment.id, bins: [{ location: 'home-a', status: 'available', quantity: 3 }] }) });
@@ -38,3 +38,4 @@ async function ready() {
   } else throw Error('Unknown test mode');
   console.log(`PASS ${mode}: authentication, stock, session/data persistence and registration switch`);
 })().catch(error => { console.error(error.message); process.exitCode = 1; });
+
