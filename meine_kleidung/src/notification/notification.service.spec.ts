@@ -20,6 +20,8 @@ describe('NotificationService', () => {
           useValue: {
             get: jest.fn((key: string) => {
               switch (key) {
+                case 'PWA_ENABLED':
+                  return true;
                 case 'SITE_URL':
                   return 'https://mysite.com';
                 case 'PUBLIC_VAPID_KEY':
@@ -66,4 +68,10 @@ describe('NotificationService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  it('starts on a local HTTP address when push is disabled', () => {
+    const config = new ConfigService({ PWA_ENABLED: false, SITE_URL: 'http://127.0.0.1:3088' });
+    expect(() => new NotificationService(config, {} as any, {} as any, {} as any)).not.toThrow();
+  });
 });
+

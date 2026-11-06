@@ -99,7 +99,8 @@ jobs:
           fi
       - name: Test container logs on failure
         if: failure()
-        run: docker logs --tail 100 closet-test 2>/dev/null || true
+        run: docker logs --tail 100 closet-test || true
       - name: Stop disposable test container
         if: always()
         run: docker rm -f closet-test 2>/dev/null || true
+

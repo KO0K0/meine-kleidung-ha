@@ -20,6 +20,7 @@ export class NotificationService {
     private userDeviceRepository: EntityRepository<UserDevice>,
     private readonly em: EntityManager,
   ) {
+    if (!this.configService.get<boolean>('PWA_ENABLED')) return;
     webpush.setVapidDetails(
       this.configService.get('SITE_URL') || '',
       this.configService.get<string>('PUBLIC_VAPID_KEY') || '',
@@ -32,6 +33,7 @@ export class NotificationService {
     subscription: webpush.PushSubscription,
     userAgent: string,
   ): Promise<void> {
+    if (!this.configService.get<boolean>('PWA_ENABLED')) return;
     const user = await this.userRepository.findOneOrFail(
       { id: userId },
       {
@@ -61,6 +63,7 @@ export class NotificationService {
     notification: PushNotificationDto,
     userId: any,
   ) {
+    if (!this.configService.get<boolean>('PWA_ENABLED')) return;
     const user = await this.userRepository.findOneOrFail(
       { id: userId },
       {
@@ -91,3 +94,4 @@ export class NotificationService {
     }
   }
 }
+
