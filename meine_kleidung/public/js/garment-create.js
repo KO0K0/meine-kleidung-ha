@@ -26,13 +26,16 @@ if (form) {
   };
   const setBusy = (value) => {
     busy = value;
-    save.disabled = value;
+    form.dataset.photoBusy = String(value);
+    save.disabled = value || form.dataset.labelScanBusy === 'true';
     input.disabled = value;
     capture.disabled = value;
     remove.disabled = value;
     cutout.disabled = value;
     document.getElementById('new-photo-camera').disabled = value;
+    form.dispatchEvent(new Event('garment-photo-busy'));
   };
+  form.addEventListener('label-scan-busy', () => { save.disabled = busy || form.dataset.labelScanBusy === 'true'; });
   const select = (file) => {
     if (!file || busy) return;
     if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type) || file.size > 20 * 1024 * 1024) {
@@ -85,7 +88,7 @@ if (form) {
   });
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (busy) return;
+    if (busy || form.dataset.labelScanBusy === 'true') return;
     const data = new FormData(form);
     data.delete('photo');
     if (photo) data.append('photo', photo, photo.name);

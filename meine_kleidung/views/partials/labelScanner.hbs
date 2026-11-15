@@ -1,0 +1,22 @@
+<details class="label-scanner" data-label-scanner data-known-brands="{{json knownBrands}}">
+  <summary>Etikett scannen <span class="label-optional">optional</span></summary>
+  <p class="label-hint">Marke, Größe, Material und gedruckte Pflegehinweise auslesen. Etikett glatt und nah fotografieren. Die Fotos bleiben im Browser und werden nicht gespeichert.</p>
+  <div class="label-actions">
+    <label class="btn btn-outline btn-sm" for="label-files">Etikettfotos auswählen</label>
+    <input id="label-files" class="new-photo-file" type="file" accept="image/jpeg,image/png,image/webp" multiple />
+    <button type="button" class="btn btn-outline btn-sm" data-label-camera aria-label="Etikett fotografieren" title="Etikett fotografieren"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 7h4l2-3h6l2 3h4v14H3z"/><circle cx="12" cy="13" r="4"/></svg></button>
+    <input data-label-capture type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden />
+  </div>
+  <div data-label-previews class="label-previews"></div>
+  <div class="label-actions">
+    <button type="button" data-label-recognize class="btn btn-outline btn-sm" disabled>Text erkennen</button>
+    <button type="button" data-label-cancel class="btn btn-ghost btn-sm" hidden>Abbrechen</button>
+  </div>
+  <p data-label-status role="status" aria-live="polite" class="label-hint">Die Erkennung startet erst auf Knopfdruck und läuft auf diesem Gerät.</p>
+  <label class="label" for="label-text">Erkannter Text – auch manuell korrigierbar</label>
+  <textarea id="label-text" rows="5" maxlength="12000" class="textarea textarea-bordered" placeholder="Du kannst Etiketttext auch hier einfügen."></textarea>
+  <button type="button" data-label-parse class="btn btn-outline btn-sm">Vorschläge ermitteln</button>
+  <div data-label-suggestions class="label-suggestions"></div>
+  <button type="button" data-label-apply class="btn btn-primary btn-sm" hidden>Ausgewählte Angaben übernehmen</button>
+  <p class="label-hint">Nur bestätigte Angaben werden übernommen. Mehrere mögliche Größen werden zur Auswahl angezeigt. Waschzeichen werden noch nicht ausgewertet.</p>
+</details>

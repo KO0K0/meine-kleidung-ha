@@ -20,6 +20,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Test label recognition rules
+        run: node --test ci/label-rules.test.mjs
       - name: Read release metadata
         id: meta
         run: |

@@ -70,6 +70,8 @@ export class GarmentService {
               { name: { $like: `%${dto.keyword}%` } },
               { notes: { $like: `%${dto.keyword}%` } },
               { brand: { $like: `%${dto.keyword}%` } },
+              { material: { $like: `%${dto.keyword}%` } },
+              { articleNumber: { $like: `%${dto.keyword}%` } },
             ],
           }
         : {}),
@@ -149,6 +151,8 @@ export class GarmentService {
       brand: dto.brand,
       color: dto.color,
       size: this.normalizeSize(dto.size),
+      material: dto.material,
+      articleNumber: dto.articleNumber,
       notes: dto.notes,
       washingDetails: dto.washingDetails,
       dateAquired: dto.dateAquired ? new Date(dto.dateAquired) : undefined,
@@ -172,6 +176,8 @@ export class GarmentService {
       brand?: string;
       color?: string;
       size?: string;
+      material?: string;
+      articleNumber?: string;
       notes?: string;
     },
     userId?: number,
@@ -205,6 +211,8 @@ export class GarmentService {
       brand: dto.brand,
       color: dto.color as any,
       size: this.normalizeSize(dto.size),
+      material: dto.material,
+      articleNumber: dto.articleNumber,
       notes: dto.notes,
       photo: photo ?? undefined,
     });
@@ -306,6 +314,8 @@ export class GarmentService {
     if ('brand' in dto) garment.brand = dto.brand;
     if ('color' in dto) garment.color = dto.color;
     if ('size' in dto) garment.size = this.normalizeSize(dto.size);
+    if ('material' in dto) garment.material = dto.material;
+    if ('articleNumber' in dto) garment.articleNumber = dto.articleNumber;
     if ('notes' in dto) garment.notes = dto.notes;
     if ('washingDetails' in dto) garment.washingDetails = dto.washingDetails;
     if ('dateAquired' in dto)

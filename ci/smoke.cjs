@@ -12,13 +12,16 @@ async function ready() {
 }
 (async () => {
   await ready();
+  for (const asset of ['/ocr/runtime/tesseract.esm.min.js', '/ocr/runtime/worker.min.js', '/ocr/core/tesseract-core-simd-lstm.wasm', '/ocr/lang/eng.traineddata.gz', '/ocr/lang/deu.traineddata.gz']) {
+    assert.equal((await fetch(base + asset, { method: 'HEAD' })).status, 200, 'Missing OCR asset: ' + asset);
+  }
   assert.equal((await fetch(base + '/inventory/data', { redirect: 'manual' })).status, 302);
   if (mode === 'init') {
     const password = 'Test1-' + randomBytes(24).toString('hex');
     const response = await fetch(base + '/auth/register', { method: 'POST', redirect: 'manual', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ email: 'container-test@example.com', password, confirmPassword: password }) });
     assert.equal(response.status, 302, 'Registration must succeed');
     const cookie = response.headers.get('set-cookie')?.split(';')[0]; assert(cookie);
-    const created = await fetch(base + '/wardrobe', { method: 'POST', redirect: 'manual', headers: { Cookie: cookie, 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ name: 'Container-Test', category: 'Kleidung' }) });
+    const created = await fetch(base + '/wardrobe', { method: 'POST', redirect: 'manual', headers: { Cookie: cookie, 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ name: 'Container-Test', category: 'Kleidung', material: '100 % Baumwolle', articleNumber: 'TEST-123', size: 'Kragen 15¾″' }) });
     assert.equal(created.status, 302, 'Garment creation must succeed');
     const snapshot = await (await fetch(base + '/inventory/data', { headers: { Cookie: cookie } })).json();
     const garment = snapshot.garments.find(g => g.name === 'Container-Test'); assert(garment);
@@ -33,6 +36,9 @@ async function ready() {
     assert.deepEqual(snapshot.garments.find(g => g.id === id).bins, [{ location: 'home-a', status: 'available', quantity: 3 }]);
     const backup = await (await fetch(base + '/inventory/backup', { headers: { Cookie: cookie } })).json();
     assert.equal(backup.garments[0].name, 'Container-Test');
+    assert.equal(backup.garments[0].material, '100 % Baumwolle');
+    assert.equal(backup.garments[0].articleNumber, 'TEST-123');
+    assert.equal(backup.garments[0].size, 'Kragen 15¾″');
     const registration = await fetch(base + '/auth/register', { method: 'POST', redirect: 'manual', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ email: 'blocked@example.com', password: 'not-used', confirmPassword: 'not-used' }) });
     assert.equal(registration.status, 302); assert.equal(registration.headers.get('location'), '/auth/login');
   } else throw Error('Unknown test mode');

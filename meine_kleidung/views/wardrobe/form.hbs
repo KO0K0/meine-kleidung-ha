@@ -70,6 +70,8 @@
         />
       </div>
 
+      {{> labelScanner knownBrands=knownBrands}}
+
       <div class="form-control">
         <label class="label"
           ><span class="label-text">{{t 'lang.CATEGORY'}} *</span></label
@@ -134,6 +136,15 @@
       </div>
 
       <div class="form-control">
+        <label class="label" for="garment-material">Material</label>
+        <input id="garment-material" name="material" class="input input-bordered" value="{{garment.material}}" placeholder="z. B. 98 % Baumwolle, 2 % Elasthan" maxlength="10000" />
+      </div>
+      <div class="form-control">
+        <label class="label" for="garment-article">Artikelnummer</label>
+        <input id="garment-article" name="articleNumber" class="input input-bordered" value="{{garment.articleNumber}}" placeholder="Optional, wie auf dem Etikett" maxlength="255" />
+      </div>
+
+      <div class="form-control">
         <label class="label"
           ><span class="label-text">{{t 'lang.DATE_AQUIRED'}}</span></label
         >
@@ -173,3 +184,4 @@
   </div>
 </main>
 {{#unless garment}}<script type="module" src="/js/garment-create.js"></script>{{/unless}}
+<script type="module" src="/js/label-scan.js"></script>

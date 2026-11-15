@@ -167,6 +167,8 @@
         garment.name,
         garment.brand,
         garment.size,
+        garment.material,
+        garment.articleNumber,
         garment.color,
         window.ClosetColors.format(garment.color),
         garment.category,

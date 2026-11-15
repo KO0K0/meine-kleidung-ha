@@ -52,6 +52,8 @@ export class InventoryService {
         category: garment.category,
         brand: garment.brand ?? '',
         size: garment.size ?? '',
+        material: garment.material ?? '',
+        articleNumber: garment.articleNumber ?? '',
         color: garment.color ?? '',
         notes: garment.notes ?? '',
         photo: garment.photo?.fileName ?? null,

@@ -67,6 +67,8 @@ const backupSchema = Joi.object({
         name: optionalText,
         brand: optionalText,
         size: optionalText,
+        material: optionalText,
+        articleNumber: optionalText.max(255),
         color: optionalText,
         notes: optionalText,
         washingDetails: optionalText,
@@ -102,6 +104,8 @@ interface Backup {
     | 'name'
     | 'brand'
     | 'size'
+    | 'material'
+    | 'articleNumber'
     | 'color'
     | 'notes'
     | 'washingDetails'
@@ -160,6 +164,8 @@ export class InventoryBackupService {
         category,
         brand,
         size,
+        material,
+        articleNumber,
         color,
         notes,
         washingDetails,
@@ -182,6 +188,8 @@ export class InventoryBackupService {
         category,
         brand: brand ?? undefined,
         size: size ?? undefined,
+        material: material ?? undefined,
+        articleNumber: articleNumber ?? undefined,
         color: color ?? undefined,
         notes: notes ?? undefined,
         washingDetails: washingDetails ?? undefined,

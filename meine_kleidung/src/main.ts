@@ -109,6 +109,19 @@ async function bootstrap() {
   });
 
   // Setup MVC https://docs.nestjs.com/techniques/mvc
+  // OCR assets stay on this server, including language models. No CDN at runtime.
+  for (const [prefix, directories] of [
+    ['/ocr/runtime/', ['tesseract.js/dist']],
+    ['/ocr/core/', ['tesseract.js-core']],
+    ['/ocr/lang/', ['@tesseract.js-data/eng/4.0.0_best_int', '@tesseract.js-data/deu/4.0.0_best_int']],
+  ] as const) {
+    app.useStaticAssets({
+      root: directories.map(directory => join(__dirname, '..', 'node_modules', directory)),
+      prefix,
+      decorateReply: false,
+    });
+  }
+
   app.setViewEngine({
     engine: { handlebars: hbs },
     templates: join(__dirname, '..', 'views'),

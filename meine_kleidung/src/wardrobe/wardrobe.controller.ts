@@ -129,6 +129,7 @@ export class WardrobeController {
       categories,
       colors: Object.values(GarmentColor),
       garment: null,
+      knownBrands: filters.brands,
       viewOwner,
     };
   }
@@ -142,6 +143,8 @@ export class WardrobeController {
       brand?: string;
       color?: string | string[];
       size?: string;
+      material?: string;
+      articleNumber?: string;
       notes?: string;
       washingDetails?: string;
       dateAquired?: string;
@@ -163,7 +166,7 @@ export class WardrobeController {
     const photos: MultipartFile[] = [];
     if (req.isMultipart()) {
       body = { category: '' };
-      const fields = new Set(['name', 'category', 'brand', 'color', 'size', 'notes', 'washingDetails', 'dateAquired']);
+      const fields = new Set(['name', 'category', 'brand', 'color', 'size', 'material', 'articleNumber', 'notes', 'washingDetails', 'dateAquired']);
       for await (const part of req.parts({ limits: { files: 2, fields: 40, parts: 42, fileSize: 20 * 1024 * 1024 } })) {
         if (part.type === 'file') {
           const bytes = await part.toBuffer();
@@ -205,6 +208,8 @@ export class WardrobeController {
         brand: body.brand,
         color: rawColors.join(','),
         size: body.size,
+        material: body.material,
+        articleNumber: body.articleNumber,
         notes: body.notes,
         washingDetails: body.washingDetails,
         dateAquired: body.dateAquired,
@@ -305,6 +310,7 @@ export class WardrobeController {
     return {
       garment,
       categories,
+      knownBrands: filters.brands,
       colors: colorEnumValues,
       customColors,
       viewOwner: viewOwner ?? null,
@@ -336,6 +342,7 @@ export class WardrobeController {
     return {
       garment,
       isClone: true,
+      knownBrands: filters.brands,
       cloneName: garment.name ? `${garment.name} (cloned)` : undefined,
       categories,
       colors: Object.values(GarmentColor),
@@ -353,6 +360,8 @@ export class WardrobeController {
       brand?: string;
       color?: GarmentColor;
       size?: string;
+      material?: string;
+      articleNumber?: string;
       notes?: string;
     },
     @Req() req: FastifyRequest,
@@ -371,6 +380,8 @@ export class WardrobeController {
         brand: body.brand,
         color: Array.isArray(body.color) ? body.color.join(',') : body.color,
         size: body.size,
+        material: body.material,
+        articleNumber: body.articleNumber,
         notes: body.notes,
       },
       userId,
@@ -388,6 +399,8 @@ export class WardrobeController {
       brand?: string;
       color?: GarmentColor;
       size?: string;
+      material?: string;
+      articleNumber?: string;
       notes?: string;
       washingDetails?: string;
       dateAquired?: string;
@@ -412,6 +425,8 @@ export class WardrobeController {
         brand: body.brand,
         color: Array.isArray(body.color) ? body.color.join(',') : body.color,
         size: body.size,
+        material: body.material,
+        articleNumber: body.articleNumber,
         notes: body.notes,
         washingDetails: body.washingDetails,
         dateAquired: body.dateAquired,
