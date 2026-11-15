@@ -1,11 +1,1 @@
-{{>navbar}}
-
-<main class="p-20 flex flex-col justify-center items-center h-full">
-  <h1>{{t 'lang.ERROR'}} {{statusCode}}</h1>
-  <p>{{message}}</p>
-  <p><small>{{t 'lang.PATH'}}: {{path}}</small></p>
-  <p><small>{{t 'lang.TIME'}}: {{timestamp}}</small></p>
-  <a href="/" class="btn">{{t 'lang.RETURN_TO_HOME'}}</a>
-</main>
-
-{{>dock}}
+{{>navbar}}<main class="account-page"><section class="account-card"><p class="eyebrow">FEHLER {{statusCode}}</p><h1>Das hat leider nicht geklappt.</h1><p role="alert">{{message}}</p><a href="/inventory" class="btn btn-primary">Zurück zum Bestand</a><details><summary>Technische Angaben</summary><p>{{path}}</p><p>{{timestamp}}</p></details></section></main>{{>dock}}

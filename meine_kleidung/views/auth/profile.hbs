@@ -1,13 +1,10 @@
 {{>navbar}}
-<main class="flex flex-col justify-center items-center h-full gap-3">
-  <h1 class="text-2xl">{{user.email}}</h1>
-  <a class="link" href="/auth/update-email">{{t 'lang.UPDATE_EMAIL'}}</a>
-  <a class="link" href="/auth/reset?email={{user.email}}"
-    >{{t 'lang.CHANGE_PASSWORD'}}</a
-  >
-  {{#if authEnabled}}
-  <a class="link" href="/wardrobe-share/manage">{{t 'lang.WARDROBE_SHARING'}}</a>
-  {{/if}}
-  <a class="link" href="/auth/delete-account">{{t 'lang.DELETE_ACCOUNT'}}</a>
-</main>
-{{>dock}}
+<main class="account-page">
+  <section class="account-card"><p class="eyebrow">DEIN KONTO</p><h1>Kontoeinstellungen</h1><p class="account-email">{{user.email}}</p>
+  <nav class="account-links" aria-label="Kontoeinstellungen">
+    <a href="/auth/update-email">E-Mail-Adresse ändern <span aria-hidden="true">→</span></a>
+    <a href="/auth/reset?email={{user.email}}">Passwort ändern <span aria-hidden="true">→</span></a>
+    {{#if authEnabled}}<a href="/wardrobe-share/manage">Zugriff verwalten <span aria-hidden="true">→</span></a>{{/if}}
+    <a href="/auth/delete-account" class="danger-link">Konto löschen <span aria-hidden="true">→</span></a>
+  </nav></section>
+</main>{{>dock}}

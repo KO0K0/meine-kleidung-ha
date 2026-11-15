@@ -1,6 +1,6 @@
 {{>navbar}}
 
-<main class="flex flex-col justify-center items-center h-full">
+<main class="account-page">
   <form hx-post="/auth/reset-code" hx-indicator="#loading" hx-trigger="submit">
     <fieldset
       class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
@@ -11,9 +11,9 @@
     >
       <legend class="fieldset-legend">{{t 'lang.CHANGE_PASSWORD'}}</legend>
 
-      <label class="label">{{t 'lang.EMAIL'}}</label>
-      <label class="input {{#if (filterErrors validationErrors "email")}}input-error{{/if}}">
-        <input
+      <label class="label" for="email">{{t 'lang.EMAIL'}}</label>
+<label class="input {{#if (filterErrors validationErrors "email")}}input-error{{/if}}">
+        <input autocomplete="email"
           id="email"
           name="email"
           type="email"
@@ -26,8 +26,8 @@
       <p class="text-error">{{this}}</p>
       {{/each}}
 
-      <label class="label">{{t 'lang.RESET_CODE'}}</label>
-      <label class="input {{#if (filterErrors validationErrors "resetCode")}}input-error{{/if}}">
+      <label class="label" for="resetCode">{{t 'lang.RESET_CODE'}}</label>
+<label class="input {{#if (filterErrors validationErrors "resetCode")}}input-error{{/if}}">
         <input
           id="resetCode"
           name="resetCode"
@@ -40,8 +40,8 @@
       <p class="text-error">{{this}}</p>
       {{/each}}
 
-      <label class="label">{{t 'lang.PASSWORD'}}</label>
-      <label class="input {{#if (filterErrors validationErrors "password")}}input-error{{/if}}">
+      <label class="label" for="password">{{t 'lang.PASSWORD'}}</label>
+<label class="input {{#if (filterErrors validationErrors "password")}}input-error{{/if}}">
         <input
           id="password"
           name="password"
@@ -56,8 +56,8 @@
       <p class="text-error">{{this}}</p>
       {{/each}}
 
-      <label class="label">{{t 'lang.CONFIRM_PASSWORD'}}</label>
-      <label class="input {{#if (filterErrors validationErrors "confirmPassword")}}input-error{{/if}}">
+      <label class="label" for="confirmPassword">{{t 'lang.CONFIRM_PASSWORD'}}</label>
+<label class="input {{#if (filterErrors validationErrors "confirmPassword")}}input-error{{/if}}">
         <input
           id="confirmPassword"
           name="confirmPassword"

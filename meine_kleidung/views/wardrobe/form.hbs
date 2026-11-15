@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="/css/inventory.css" />
+
 <main class="closet-editor" hx-boost="false">
   <div class="closet-sheet">
     <div class="flex items-center gap-3 mb-6">
@@ -58,11 +58,10 @@
       <div id="new-garment-error" class="alert alert-error" role="alert" hidden></div>
       {{/unless}}
       <div class="form-control">
-        <label class="label"
+        <label class="label" for="field-name"
           ><span class="label-text">{{t 'lang.NAME'}}</span></label
         >
-        <input
-          type="text"
+        <input id="field-name"           type="text"
           name="name"
           class="input input-bordered"
           value="{{#if isClone}}{{cloneName}}{{else if garment}}{{garment.name}}{{/if}}"
@@ -73,11 +72,10 @@
       {{> labelScanner knownBrands=knownBrands}}
 
       <div class="form-control">
-        <label class="label"
+        <label class="label" for="field-category"
           ><span class="label-text">{{t 'lang.CATEGORY'}} *</span></label
         >
-        <input
-          type="text"
+        <input id="field-category"           type="text"
           name="category"
           list="category-suggestions"
           class="input input-bordered w-full"
@@ -94,11 +92,10 @@
       </div>
 
       <div class="form-control">
-        <label class="label"
+        <label class="label" for="field-brand"
           ><span class="label-text">{{t 'lang.BRAND'}}</span></label
         >
-        <input
-          type="text"
+        <input id="field-brand"           type="text"
           name="brand"
           class="input input-bordered"
           value="{{#if garment}}{{garment.brand}}{{/if}}"
@@ -109,11 +106,10 @@
       {{> colorMultiSelect colors=colors garment=garment}}
 
       <div class="form-control">
-        <label class="label"
+        <label class="label" for="field-size"
           ><span class="label-text">{{t 'lang.SIZE'}}</span></label
         >
-        <input
-          type="text"
+        <input id="field-size"           type="text"
           name="size"
           class="input input-bordered"
           value="{{#if garment}}{{garment.size}}{{/if}}"
@@ -122,11 +118,10 @@
       </div>
 
       <div class="form-control">
-        <label class="label"
+        <label class="label" for="field-washingDetails"
           ><span class="label-text">{{t 'lang.WASHING_DETAILS'}}</span></label
         >
-        <textarea
-          name="washingDetails"
+        <textarea id="field-washingDetails"           name="washingDetails"
           class="textarea textarea-bordered"
           rows="3"
           placeholder="Bei 30 °C waschen …"
@@ -145,11 +140,10 @@
       </div>
 
       <div class="form-control">
-        <label class="label"
+        <label class="label" for="field-dateAquired"
           ><span class="label-text">{{t 'lang.DATE_AQUIRED'}}</span></label
         >
-        <input
-          type="date"
+        <input id="field-dateAquired"           type="date"
           name="dateAquired"
           class="input input-bordered"
           value="{{formatDate garment.dateAquired}}"
@@ -157,11 +151,10 @@
       </div>
 
       <div class="form-control">
-        <label class="label"
+        <label class="label" for="field-notes"
           ><span class="label-text">{{t 'lang.NOTES'}}</span></label
         >
-        <textarea
-          name="notes"
+        <textarea id="field-notes"           name="notes"
           class="textarea textarea-bordered"
           rows="3"
           placeholder="Notizen zu diesem Kleidungsstück …"
@@ -170,7 +163,7 @@
         >
       </div>
 
-      <div class="flex gap-2 mt-2">
+      <div class="editor-actions flex gap-2 mt-2">
         <a
           href="{{#if garment}}/wardrobe/{{garment.id}}{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}{{else}}/inventory{{/if}}"
           class="btn btn-ghost flex-1"

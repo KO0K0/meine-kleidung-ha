@@ -1,9 +1,9 @@
 {{>navbar}}
-<main class="flex flex-col justify-center items-center h-full">
+<main class="account-page">
   {{#if error}}
   <div
     role="alert"
-    class="alert alert-error fixed top-20 left-1/2 -translate-x-1/2 w-[80%] z-50 shadow-lg"
+    class="alert alert-error"
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -33,9 +33,9 @@
     >
       <legend class="fieldset-legend">{{t 'lang.DELETE_ACCOUNT'}}</legend>
 
-      <label class="label">{{t 'lang.EMAIL'}}</label>
-      <label class="input">
-        <input
+      <label class="label" for="account-email">{{t 'lang.EMAIL'}}</label>
+<label class="input">
+        <input autocomplete="email" id="account-email"
           name="email"
           type="email"
           placeholder="{{t 'lang.EMAIL'}}"
@@ -43,9 +43,9 @@
         />
       </label>
 
-      <label class="label">{{t 'lang.PASSWORD'}}</label>
-      <label class="input">
-        <input
+      <label class="label" for="account-password">{{t 'lang.PASSWORD'}}</label>
+<label class="input">
+        <input autocomplete="current-password" id="account-password"
           name="password"
           type="password"
           required

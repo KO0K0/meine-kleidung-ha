@@ -1,12 +1,14 @@
-<link rel="stylesheet" href="/css/inventory.css" />
+
+<a class="skip-link" href="#inventory-content">Zum Bestand springen</a>
 <main class="closet" hx-boost="false">
   <header class="closet-header">
     <div>
-      <p class="eyebrow">LIBRE CLOSET · DEIN BESTAND</p>
-      <h1>Meine Kleidung</h1>
-      <p>Deine Kleidung nach Ort und Verfügbarkeit.</p>
+      <p class="eyebrow">DEIN DIGITALER KLEIDERSCHRANK</p>
+      <h1 id="view-title">Meine Kleidung</h1>
+      <p id="view-description">Alles an seinem Platz.</p>
     </div>
     <div class="closet-header-actions">
+      <button type="button" class="tools-trigger" popovertarget="closet-tools" aria-label="Schrank-Werkzeuge öffnen" title="Schrank erfassen, Sicherung und Konto"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>
       <button
         id="open-voice"
         type="button"
@@ -18,28 +20,68 @@
           <path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8" />
         </svg>
       </button>
-      <a class="primary" href="/wardrobe/new">＋ Artikel hinzufügen</a>
+      <a class="primary" href="/wardrobe/new">＋ <span>Artikel hinzufügen</span></a>
     </div>
   </header>
   <nav class="closet-tabs" aria-label="Kleidungsverwaltung">
-    <button data-tab="all" aria-pressed="true">Übersicht</button>
+    <a class="nav-brand" href="/inventory"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 4-5 2-3 5 4 2 2-2v9h10v-9l2 2 4-2-3-5-5-2a3 3 0 0 1-6 0Z"/></svg><span>Mein Schrank</span></a>
+    <button data-tab="all" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg><span>Übersicht</span></button>
     <button data-tab="laundry" aria-pressed="false">
-      Wäsche <span id="laundry-count">0</span>
+<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 8h14"/><circle cx="12" cy="14" r="3"/></svg><span>Wäsche <b id="laundry-count">0</b></span>
     </button>
-    <button data-tab="luggage" aria-pressed="false">Gepäck</button>
-    <button data-tab="places" aria-pressed="false">Orte</button>
+    <button data-tab="luggage" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="16" height="15" rx="3"/><path d="M9 6V3h6v3M9 10v7m6-7v7"/></svg><span>Gepäck</span></button>
+    <button data-tab="places" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span>Orte</span></button>
   </nav>
+  <div id="closet-tools" class="closet-tools" popover><h2>Dein Schrank</h2>  <details class="backup-tools capture-tools">
+    <summary>Schrank erfassen</summary>
+    <p>Viele Kleidungsstücke nacheinander aufnehmen. Kategorie und Ort einmal wählen und für die nächsten Artikel beibehalten.</p>
+    <a class="primary" href="/wardrobe/new?capture=1">Schrank-Erfassung starten</a>
+  </details>
+  <details class="backup-tools">
+    <summary>Sicherung &amp; Import</summary>
+    <p>
+      Eine Sicherung enthält deinen Bestand mit Fotos. Importiere sie in einen
+      leeren Bestand.
+    </p>
+    <a class="primary" href="/inventory/backup" download
+      >Sicherung herunterladen</a
+    >
+    <form id="backup-import">
+      <label
+        >Sicherungsdatei<input
+          type="file"
+          id="backup-file"
+          accept=".json,application/json"
+          required
+      /></label>
+      <button type="submit">Importieren</button>
+    </form>
+  </details>
+  <footer>
+    Basierend auf
+    <a
+      href="https://github.com/Lazztech/Libre-Closet"
+      target="_blank"
+      rel="noopener"
+      >Libre Closet</a
+    >
+    {{#if authEnabled}} · <a href="/auth/profile">Konto</a>{{/if}}
+  </footer>
+</div>
   <p id="inventory-message" role="status" aria-live="polite"></p>
   <button id="undo-action" type="button" hidden>Rückgängig</button>
-  <section id="inventory-content">
+  <section id="inventory-content" tabindex="-1">
     <div class="closet-stats" id="inventory-stats"></div>
-    <div class="closet-filters">
+    <div class="closet-filters" role="search" aria-label="Kleidung suchen und filtern">
       <label class="search-label"
         >Suche<input
           id="inventory-search"
           type="search"
           placeholder="Name, Marke, Größe, Farbe …"
       /></label>
+      <details id="filter-options" class="filter-options" open>
+        <summary>Filter <span id="filter-count"></span></summary>
+        <div class="filter-fields">
       <label
         >Ort<select id="inventory-location">
           <option value="">Alle Orte</option>
@@ -57,13 +99,15 @@
           <option value="laundry">In der Wäsche</option>
         </select></label
       >
+        </div>
+      </details>
     </div>
+    <div id="active-filters" class="active-filters" aria-label="Aktive Filter"></div>
     <div class="selection-bar">
       <label
-        ><input type="checkbox" id="select-visible" /> Sichtbare Bestände
-        auswählen</label
+        ><input type="checkbox" id="select-visible" /> Sichtbare auswählen</label
       >
-      <button id="refresh-inventory" type="button">Aktualisieren</button>
+      <span id="result-count" class="result-count" role="status"></span><button id="refresh-inventory" type="button" title="Bestand aktualisieren" aria-label="Bestand aktualisieren"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6 6a8 8 0 0 1 13 3M5 15a8 8 0 0 0 13 3"/></svg></button>
     </div>
     <div id="inventory-grid" class="closet-grid" aria-live="polite"></div>
     <div class="batch-bar" id="batch-bar" hidden>
@@ -99,41 +143,6 @@
       ><button class="primary">Ort hinzufügen</button>
     </form>
   </section>
-  <details class="backup-tools capture-tools">
-    <summary>Schrank erfassen</summary>
-    <p>Viele Kleidungsstücke nacheinander aufnehmen. Kategorie und Ort einmal wählen und für die nächsten Artikel beibehalten.</p>
-    <a class="primary" href="/wardrobe/new?capture=1">Schrank-Erfassung starten</a>
-  </details>
-  <details class="backup-tools">
-    <summary>Sicherung &amp; Import</summary>
-    <p>
-      Eine Sicherung enthält deinen Bestand mit Fotos. Importiere sie in einen
-      leeren Bestand.
-    </p>
-    <a class="primary" href="/inventory/backup" download
-      >Sicherung herunterladen</a
-    >
-    <form id="backup-import">
-      <label
-        >Sicherungsdatei<input
-          type="file"
-          id="backup-file"
-          accept=".json,application/json"
-          required
-      /></label>
-      <button type="submit">Importieren</button>
-    </form>
-  </details>
-  <footer>
-    Basierend auf
-    <a
-      href="https://github.com/Lazztech/Libre-Closet"
-      target="_blank"
-      rel="noopener"
-      >Libre Closet</a
-    >
-    {{#if authEnabled}} · <a href="/auth/profile">Konto</a>{{/if}}
-  </footer>
   <div class="scroll-tools" aria-label="Schnellnavigation">
     <button
       id="floating-search-button"
@@ -195,42 +204,18 @@
   </form>
 </dialog>
 <dialog
-  id="garment-menu"
-  class="stock-dialog garment-menu"
-  aria-labelledby="garment-menu-title"
-  hx-boost="false"
->
-  <header>
-    <h2 id="garment-menu-title"></h2>
-    <form method="dialog"><button aria-label="Schließen">×</button></form>
-  </header>
-  <div class="garment-menu-actions">
-    <button type="button" id="garment-menu-stock">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 7h16v13H4zM3 4h18v3H3zM10 11h4" />
-      </svg>
-      Mengen &amp; Orte
-    </button>
-    <a id="garment-menu-details">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 7h4l2-3h4l2 3h4v13H4z" />
-        <circle cx="12" cy="13" r="3" />
-      </svg>
-      Details &amp; Foto
-    </a>
-  </div>
-</dialog>
-<dialog
   id="stock-dialog"
   class="stock-dialog"
   aria-labelledby="stock-title"
   hx-boost="false"
 >
-  <form id="stock-form">
     <header>
       <h2 id="stock-title">Mengen verteilen</h2>
       <button type="button" id="close-stock" aria-label="Schließen">×</button>
     </header>
+    <nav class="article-sections" aria-label="Artikelbereiche"><button id="article-stock-tab" type="button" aria-pressed="true" aria-controls="stock-form">Mengen &amp; Orte</button><button id="article-details-tab" type="button" aria-pressed="false" aria-controls="article-details">Details &amp; Foto</button></nav>
+  <section id="article-details" class="article-details" aria-label="Details und Foto" hidden></section>
+  <form id="stock-form">
     <p id="stock-instruction">Mit − Stücke abziehen und mit + neu zuweisen.</p>
     <p id="stock-pool" aria-live="polite"></p>
     <div class="stock-head">

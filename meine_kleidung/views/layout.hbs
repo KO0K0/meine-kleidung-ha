@@ -44,8 +44,7 @@ https://nestjs-i18n.com/quick-start --}}
     <meta name="htmx-config" content='{"disableInheritance":true}' />
 
     <title>
-      {{#if pageTitle}}{{pageTitle}}{{else}}{{appName}} — Free Self-Hosted
-      Wardrobe Organizer{{/if}}
+      {{#if pageTitle}}{{pageTitle}}{{else}}Meine Kleidung{{/if}}
     </title>
     {{! Used inconjunction with service worker sw.js to enable PWA (Progressive
     Web App) functionality. }}
@@ -74,8 +73,9 @@ https://nestjs-i18n.com/quick-start --}}
     {{! Include assets/main.css and build output from TailwindCSS/DaisyUI }}
     <link href="/bundle.css" rel="preload" as="style" />
     <link href="/bundle.css" rel="stylesheet" />
-    <link href="/css/closet-theme.css" rel="stylesheet" />
+    <link href="/css/design-system.css" rel="stylesheet" />
     <script src="/js/closet-colors.js" defer></script>
+    <script src="/js/interface.js" defer></script>
     <script>
       window.KNOWN_COLORS = new Set({{{knownColors}}});
     </script>

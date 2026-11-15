@@ -12,8 +12,8 @@
   }
 </script>
 
-<main class="flex flex-col justify-center items-center h-full">
-  <h1 class="text-2xl font-bold mb-4">{{t 'lang.REGISTER_OG_TITLE'}}</h1>
+<main class="account-page">
+  <h1 class="text-2xl font-bold mb-4">Dein Konto erstellen</h1>
   <form hx-post="/auth/register" hx-indicator="#loading" hx-trigger="submit">
     <fieldset
       class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
@@ -24,9 +24,9 @@
     >
       <legend class="fieldset-legend">{{t 'lang.REGISTER'}}</legend>
 
-      <label class="label">{{t 'lang.EMAIL'}}</label>
-      <label class="input {{#if (filterErrors validationErrors "email")}}input-error{{/if}}">
-        <input
+      <label class="label" for="email">{{t 'lang.EMAIL'}}</label>
+<label class="input {{#if (filterErrors validationErrors "email")}}input-error{{/if}}">
+        <input autocomplete="email"
           id="email"
           name="email"
           type="email"
@@ -39,8 +39,8 @@
       <p class="text-error">{{this}}</p>
       {{/each}}
 
-      <label class="label">{{t 'lang.PASSWORD'}}</label>
-      <label class="input {{#if (filterErrors validationErrors "password")}}input-error{{/if}}">
+      <label class="label" for="password">{{t 'lang.PASSWORD'}}</label>
+<label class="input {{#if (filterErrors validationErrors "password")}}input-error{{/if}}">
         <input
           id="password"
           name="password"
@@ -55,8 +55,8 @@
       <p class="text-error">{{this}}</p>
       {{/each}}
 
-      <label class="label">{{t 'lang.CONFIRM_PASSWORD'}}</label>
-      <label class="input {{#if (filterErrors validationErrors "confirmPassword")}}input-error{{/if}}">
+      <label class="label" for="confirmPassword">{{t 'lang.CONFIRM_PASSWORD'}}</label>
+<label class="input {{#if (filterErrors validationErrors "confirmPassword")}}input-error{{/if}}">
         <input
           id="confirmPassword"
           name="confirmPassword"

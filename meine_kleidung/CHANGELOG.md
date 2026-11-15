@@ -1,5 +1,17 @@
 # Änderungen
 
+## 0.5.0
+
+- Einheitliches responsives Darkmode-Design; Navigation unten am Handy und seitlich am Desktop.
+- Alte eigene Design-Stylesheets entfernt und Gestaltung einschließlich Farbwahl, Konto- und Fehlerseiten zusammengeführt.
+- Kompakte Bestandsübersicht, mobile Filter und einzeln entfernbare aktive Filter.
+- Gemeinsames Artikelpanel mit Mengen & Orten sowie Details & Foto.
+- Suche, Filter, Auswahl und Scrollposition bleiben beim Wechsel zu Artikelseiten erhalten.
+- Die bewährten Wäsche-Symbole und Mengenregeln bleiben unverändert.
+- Dezente Panel-, Filter- und Bestandsanimationen, mit Unterstützung für reduzierte Bewegung.
+- Speichermeldungen ohne Layoutsprung, verbesserter Tastaturfokus und Rücksicht auf Bildschirmtastaturen.
+- Schrank-Erfassung, Sicherung und Konto im Dreipunktmenü der Übersicht.
+
 ## 0.4.0
 
 - Separater Modus „Schrank erfassen“ unter den Werkzeugen am Ende der Übersicht; „Artikel hinzufügen“ bleibt unverändert.

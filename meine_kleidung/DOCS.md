@@ -45,3 +45,10 @@ Material und Artikelnummer werden mit gesichert. Sicherungen älterer Versionen 
 Am Ende der Übersicht „Schrank erfassen“ aufklappen und die Erfassung starten. Kategorie (etwa Pullover) und Ort einmal festlegen. Anschließend pro Artikel Foto und optional Etikett auswählen, im nächsten Schritt Angaben prüfen und „Speichern & nächster“ drücken. Fotos sind optional. Die Menge beginnt für jeden Artikel bei 1; nur identische Exemplare als höhere Menge zusammenfassen.
 
 Kategorie und Ort bleiben in dieser Browsersitzung erhalten. Weitere Angaben wie Pflege, Material und Artikelnummer können im Prüfschritt aufgeklappt werden. Für den nächsten Kleidungsstapel oben „Kategorie / Ort ändern“ wählen. Mit „Speichern & beenden“ wird der letzte Artikel gespeichert und die Übersicht geöffnet. Individuelle Entwürfe/Fotos werden nicht über ein Neuladen der Seite hinweg gespeichert. Bei ungespeicherten Eingaben erscheint eine Warnung vor dem Verlassen.
+
+
+## Oberfläche ab 0.5.0
+
+Das Dreipunktmenü oben enthält Schrank-Erfassung, Sicherung/Import und das Konto. Am Handy liegt die Hauptnavigation unten; Filter lassen sich ausklappen. Ein Klick auf ein Kleidungsbild öffnet das Artikelpanel mit „Mengen & Orte“ und „Details & Foto“. Die Bearbeitung von Angaben und Fotos ist von dort erreichbar. Suche und Auswahl bleiben bei der Rückkehr erhalten.
+
+Animationen berücksichtigen die Systemeinstellung für reduzierte Bewegung. Die Anwendung verwendet weiterhin ihre vorhandene Datenbank; das Designupdate benötigt keinen Datenimport.

@@ -13,6 +13,12 @@
           "'": '&#39;',
         })[char],
     );
+  const mobileLayout = matchMedia('(max-width: 700px)');
+  if (mobileLayout.matches) $('filter-options').open = false;
+  mobileLayout.addEventListener('change', ({ matches }) => {
+    if (!matches) $('filter-options').open = true;
+  });
+  let messageTimer;
   let data;
   let tab = 'all';
   let busy = false;
@@ -23,6 +29,7 @@
   let pendingMove;
   let visible = [];
   const selected = new Map();
+  let returnFocus;
   const statusName = (status) =>
     status === 'laundry' ? 'In der Wäsche' : 'Verfügbar';
   const keyFor = (id, bin) => `${id}/${bin.location}/${bin.status}`;
@@ -30,7 +37,9 @@
   const washer =
     '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 8h14"/><circle cx="12" cy="14" r="3"/>';
   const message = (text, error = false) => {
+    clearTimeout(messageTimer);
     $('inventory-message').textContent = text;
+    if (text && !error) messageTimer = setTimeout(() => { $('inventory-message').textContent = ''; }, 4500);
     $('inventory-message').classList.toggle('error', error);
   };
   const options = (places) =>
@@ -41,6 +50,15 @@
       )
       .join('');
   const setBusy = (value) => {
+    if (value) {
+      const active = document.activeElement;
+      const card = active?.closest('.garment-card');
+      returnFocus = card ? {
+        garment: card.querySelector('[data-garment]')?.dataset.garment,
+        key: active.closest('.stock-bin')?.dataset.key,
+        kind: active.hasAttribute('data-laundry-bin') ? '[data-laundry-bin]' : active.hasAttribute('data-select') ? '[data-select]' : active.hasAttribute('data-quantity') ? '[data-quantity]' : '[data-garment]',
+      } : undefined;
+    }
     busy = value;
     document
       .querySelectorAll('.closet button, .stock-dialog button[type=submit]')
@@ -48,6 +66,12 @@
         button.disabled = value;
       });
     if ($('stock-dialog').open) updateStockControls();
+    if (!value && returnFocus && !document.querySelector('dialog[open]')) {
+      const card = $('inventory-grid').querySelector(`[data-garment="${returnFocus.garment}"]`)?.closest('.garment-card');
+      const row = [...(card?.querySelectorAll('.stock-bin') || [])].find(row => row.dataset.key === returnFocus.key);
+      (row?.querySelector(returnFocus.kind) || card?.querySelector('[data-garment]'))?.focus({ preventScroll: true });
+      returnFocus = undefined;
+    }
   };
 
   async function request(path, body) {
@@ -76,7 +100,11 @@
 
   async function load() {
     data = await request('/inventory/data');
-    selected.clear();
+    for (const [key, entry] of selected) {
+      const bin = data.garments.find(g => g.id === entry.garmentId)?.bins.find(b => b.location === entry.location && b.status === entry.status);
+      if (!bin?.quantity) selected.delete(key);
+      else entry.quantity = Math.min(entry.quantity, bin.quantity);
+    }
     const previousPlace = $('inventory-location').value;
     $('inventory-location').innerHTML =
       '<option value="">Alle Orte</option>' + options(data.locations);
@@ -99,12 +127,12 @@
     renderPlaces();
   }
 
-  async function refresh() {
+  async function refresh(announce = false) {
     if (busy) return;
     setBusy(true);
     try {
       await load();
-      message('Bestand aktualisiert.');
+      if (announce) message('Bestand aktualisiert.');
     } catch (error) {
       message(error.message, true);
     } finally {
@@ -131,7 +159,13 @@
         ? { type: 'restore', restore, revision: result.revision }
         : undefined;
       $('undo-action').hidden = !undoAction;
+      selected.clear();
       await load();
+      for (const id of affected) {
+        const card = $('inventory-grid').querySelector('[data-garment="' + id + '"]')?.closest('.garment-card');
+        card?.classList.add('just-changed');
+        card?.addEventListener('animationend', () => card.classList.remove('just-changed'), { once: true });
+      }
       message(
         action.type === 'restore'
           ? 'Änderung rückgängig gemacht.'
@@ -201,7 +235,7 @@
           const quickLabel = inLaundry
             ? 'Alle aus der Wäsche'
             : '1 in die Wäsche';
-          return `<div class="stock-bin">
+          return `<div class="stock-bin" data-key="${escape(key)}">
             <input type="checkbox" id="bin-${index}" data-select="${index}" aria-label="${escape(garment.name)} in ${escape(place)} auswählen" ${selected.has(key) ? 'checked' : ''}>
             <label for="bin-${index}">${escape(place)}
               <small title="${status}"><svg viewBox="0 0 24 24" role="img" aria-label="${status}">${icon}</svg>×${bin.quantity}</small>
@@ -229,11 +263,38 @@
         </div>
       </article>`);
     }
+    const focused = document.activeElement;
+    const focusedRow = focused?.closest('.stock-bin');
+    const focusIndex = focused?.dataset.select ?? focused?.dataset.quantity ?? focused?.dataset.laundryBin;
+    const focusKey = focusedRow?.dataset.key;
+    const focusKind = focused?.hasAttribute('data-select') ? 'data-select' : focused?.hasAttribute('data-quantity') ? 'data-quantity' : 'data-laundry-bin';
+    const garmentFocus = focused?.dataset.garment;
     $('inventory-grid').innerHTML =
       cards.join('') ||
       `<div class="empty-state"><h2>${tab === 'laundry' ? 'Der Wäschekorb ist leer' : 'Hier ist noch Platz'}</h2><p>${data.garments.length ? 'Passe die Filter an oder verschiebe Artikel hierher.' : 'Füge deinen ersten Artikel hinzu. Danach kannst du Mengen und Orte festlegen.'}</p></div>`;
+    if (focusIndex !== undefined && focusKey) {
+      const row = [...$('inventory-grid').querySelectorAll('.stock-bin')].find(row => row.dataset.key === focusKey);
+      row?.querySelector('[' + focusKind + ']')?.focus({ preventScroll: true });
+    } else if (garmentFocus) $('inventory-grid').querySelector('[data-garment="' + garmentFocus + '"]')?.focus({ preventScroll: true });
+    $('result-count').textContent = `${cards.length} Artikel`;
+    renderFilterChips();
     updateSelection();
     updateScrollTools();
+  }
+
+  function renderFilterChips() {
+    const filters = [['inventory-location', 'Ort'], ['inventory-category', 'Kategorie'], ['inventory-status', 'Status']];
+    const count = filters.filter(([id]) => $(id).value && !$(id).disabled).length;
+    $('filter-count').textContent = count ? `(${count})` : '';
+    $('active-filters').replaceChildren(...filters.filter(([id]) => $(id).value && !$(id).disabled).map(([id, label]) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      const value = $(id).selectedOptions[0]?.textContent || $(id).value;
+      button.textContent = value + ' ×';
+      button.setAttribute('aria-label', label + ': ' + value + ' entfernen');
+      button.addEventListener('click', () => { $(id).value = ''; render(); $(id).focus(); });
+      return button;
+    }));
   }
 
   function updateSelection() {
@@ -267,6 +328,21 @@
       .join('');
   }
 
+  function showArticleSection(section) {
+    $('stock-form').hidden = section !== 'stock';
+    $('article-details').hidden = section !== 'details';
+    $('article-stock-tab').setAttribute('aria-pressed', String(section === 'stock'));
+    $('article-details-tab').setAttribute('aria-pressed', String(section === 'details'));
+  }
+  function renderArticleDetails(garment) {
+    const attributes = [['Kategorie', garment.category], ['Marke', garment.brand], ['Größe', garment.size], ['Farbe', window.ClosetColors.format(garment.color)], ['Material', garment.material], ['Artikelnummer', garment.articleNumber], ['Notizen', garment.notes]];
+    $('article-details').innerHTML = (garment.photo ? '<img src="/file/nobg/' + encodeURIComponent(garment.photo) + '" alt="' + escape(garment.name || garment.category) + '">' : '<p>Noch kein Foto hinzugefügt.</p>')
+      + '<dl>' + attributes.filter(([,value]) => value).map(([label,value]) => '<dt>' + label + '</dt><dd>' + escape(value) + '</dd>').join('') + '</dl>'
+      + '<a class="primary" href="/wardrobe/' + garment.id + '/edit">Angaben bearbeiten</a><a href="/wardrobe/' + garment.id + '">Foto &amp; weitere Optionen</a>';
+  }
+  $('article-stock-tab').addEventListener('click', () => showArticleSection('stock'));
+  $('article-details-tab').addEventListener('click', () => showArticleSection('details'));
+
   function openStock(id) {
     const garment = data.garments.find((entry) => entry.id === id);
     if (!garment) return;
@@ -275,6 +351,8 @@
     editTotal = sum(garment.bins);
     $('stock-correction').checked = false;
     $('stock-title').textContent = garment.name || garment.category;
+    showArticleSection('stock');
+    renderArticleDetails(garment);
     $('stock-error').textContent = '';
     $('stock-inputs').innerHTML = data.locations
       .map(
@@ -338,6 +416,9 @@
       $('inventory-places').hidden = tab !== 'places';
       $('inventory-location').disabled = tab === 'luggage';
       $('inventory-status').disabled = tab === 'laundry';
+      const titles = { all: ["Meine Kleidung", "Alles an seinem Platz."], laundry: ["Deine Wäsche", "Vom Wäschekorb zurück in den Schrank."], luggage: ["Dein Gepäck", "Alles, was mitkommt."], places: ["Deine Orte", "Ein Zuhause für jedes Kleidungsstück."] };
+      $("view-title").textContent = titles[tab][0];
+      $("view-description").textContent = titles[tab][1];
       render();
     }),
   );
@@ -386,17 +467,7 @@
       (entry) => entry.id === Number(button.dataset.garment),
     );
     if (!garment) return;
-    $('garment-menu-title').textContent = garment.name || garment.category;
-    $('garment-menu-stock').dataset.garment = String(garment.id);
-    $('garment-menu-details').href = `/wardrobe/${garment.id}`;
-    $('garment-menu').showModal();
-  });
-  $('garment-menu-stock').addEventListener('click', (event) => {
-    $('garment-menu').close();
-    openStock(Number(event.currentTarget.dataset.garment));
-  });
-  $('garment-menu').addEventListener('click', (event) => {
-    if (event.target === $('garment-menu')) $('garment-menu').close();
+    openStock(garment.id);
   });
   $('inventory-grid').addEventListener('change', (event) => {
     const input = event.target;
@@ -731,8 +802,11 @@
       setBusy(false);
     }
   });
-  $('refresh-inventory').addEventListener('click', refresh);
+  $('refresh-inventory').addEventListener('click', () => refresh(true));
   $('close-stock').addEventListener('click', () => $('stock-dialog').close());
+  $('stock-dialog').addEventListener('close', () => {
+    $('inventory-grid').querySelector(`[data-garment="${editId}"]`)?.focus({ preventScroll: true });
+  });
   $('stock-inputs').addEventListener('click', (event) => {
     const button = event.target.closest('[data-step]');
     if (!button) return;
@@ -810,7 +884,6 @@
       !busy &&
       !selected.size &&
       !$('stock-dialog').open &&
-      !$('garment-menu').open &&
       !$('move-preview').open &&
       !$('voice-dialog').open &&
       tab !== 'places' &&
@@ -818,8 +891,27 @@
     )
       refresh();
   }, 30000);
+  const contextKey = 'closet-view-context-v1';
+  window.addEventListener('pagehide', () => {
+    try { sessionStorage.setItem(contextKey, JSON.stringify({ time: Date.now(), tab, query: $('inventory-search').value, location: $('inventory-location').value, category: $('inventory-category').value, status: $('inventory-status').value, selected: [...selected], scroll: window.scrollY })); } catch {}
+  });
   (async () => {
     await refresh();
+    try {
+      const context = JSON.parse(sessionStorage.getItem(contextKey) || 'null');
+      if (data && context && Date.now() - context.time < 7200000) {
+        $('inventory-search').value = context.query || '';
+        $('floating-search').value = context.query || '';
+        for (const field of ['location','category','status']) $('inventory-' + field).value = context[field] || '';
+        for (const [key,entry] of context.selected || []) {
+          const bin = data.garments.find(g => g.id === entry.garmentId)?.bins.find(b => b.location === entry.location && b.status === entry.status);
+          if (bin?.quantity && Number.isSafeInteger(entry.quantity) && entry.quantity > 0) selected.set(key, { ...entry, quantity: Math.min(entry.quantity, bin.quantity) });
+        }
+        const target = document.querySelector('[data-tab="' + (['all','laundry','luggage','places'].includes(context.tab) ? context.tab : 'all') + '"]');
+        target?.click();
+        window.scrollTo({ top: context.scroll || 0, behavior: 'instant' });
+      }
+    } catch { /* Unavailable or stale session storage must not block the app. */ }
     const id = Number(new URLSearchParams(location.search).get('item'));
     if (id && data) openStock(id);
   })();
