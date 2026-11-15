@@ -1,5 +1,6 @@
 import {
   Body,
+  BadRequestException,
   Controller,
   Delete,
   ForbiddenException,
@@ -25,6 +26,8 @@ import { WardrobeShareService } from '../wardrobe-share/wardrobe-share.service';
 import { SharePermission } from '../dal/entity/wardrobe-share.entity';
 import type { SearchGarmentDto } from './dto/search-garment.dto';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { MultipartFile } from '@fastify/multipart';
+import { Readable } from 'node:stream';
 
 @UseGuards(ConditionalAuthGuard)
 @Controller('wardrobe')
@@ -156,6 +159,38 @@ export class WardrobeController {
     }
 
     // Fastify gives string if one checkbox, string[] if multiple — normalise both
+    // Read all fields before creating anything. Multipart fields may follow files.
+    const photos: MultipartFile[] = [];
+    if (req.isMultipart()) {
+      body = { category: '' };
+      const fields = new Set(['name', 'category', 'brand', 'color', 'size', 'notes', 'washingDetails', 'dateAquired']);
+      for await (const part of req.parts({ limits: { files: 2, fields: 40, parts: 42, fileSize: 20 * 1024 * 1024 } })) {
+        if (part.type === 'file') {
+          const bytes = await part.toBuffer();
+          if (!bytes.length) continue;
+          if (!['photo', 'nobgPhoto'].includes(part.fieldname) ||
+              !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(part.mimetype) ||
+              photos.some(photo => photo.fieldname === part.fieldname)) {
+            throw new BadRequestException('Bitte ein gültiges Kleidungsfoto auswählen.');
+          }
+          photos.push({ ...part, file: Readable.from(bytes) } as MultipartFile);
+        } else if (fields.has(part.fieldname)) {
+          const value = String(part.value);
+          if (part.fieldname === 'color') {
+            const previous = body.color;
+            body.color = previous ? [...(Array.isArray(previous) ? previous : [previous]), value] : [value];
+          } else {
+            body[part.fieldname] = value;
+          }
+        }
+      }
+    }
+    if (!body?.category?.trim()) {
+      throw new BadRequestException('Bitte eine Kategorie angeben.');
+    }
+    if (photos.some(photo => photo.fieldname === 'nobgPhoto') && !photos.some(photo => photo.fieldname === 'photo')) {
+      throw new BadRequestException('Das Originalfoto fehlt.');
+    }
     const rawColors = Array.isArray(body.color)
       ? body.color
       : (body.color
@@ -173,6 +208,7 @@ export class WardrobeController {
         notes: body.notes,
         washingDetails: body.washingDetails,
         dateAquired: body.dateAquired,
+        files: photos.length ? (async function* () { yield* photos; })() : undefined,
       },
       viewOwner ?? userId,
     );

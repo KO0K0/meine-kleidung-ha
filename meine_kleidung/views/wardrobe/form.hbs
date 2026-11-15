@@ -32,7 +32,31 @@
       method="POST"
       action="{{#if isClone}}/wardrobe/{{garment.id}}/clone{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}{{else if garment}}/wardrobe/{{garment.id}}{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}{{else}}/wardrobe{{#if viewOwner}}?ownerId={{viewOwner}}{{/if}}{{/if}}"
       class="flex flex-col gap-4"
+      {{#unless garment}}id="new-garment-form" enctype="multipart/form-data"{{/unless}}
     >
+      {{#unless garment}}
+      <section class="new-garment-photo" aria-labelledby="new-photo-heading">
+        <h2 id="new-photo-heading">Kleidungsfoto <span class="text-sm font-normal">(optional)</span></h2>
+        <div class="new-photo-preview">
+          <img id="new-photo-preview" alt="Vorschau des ausgewählten Kleidungsstücks" hidden />
+          <span id="new-photo-placeholder">Foto zuerst aufnehmen oder auswählen</span>
+        </div>
+        <div class="new-photo-actions">
+          <label class="btn btn-outline btn-sm" for="new-photo-input">Bild auswählen</label>
+          <input id="new-photo-input" type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/gif" class="new-photo-file" />
+          <button id="new-photo-camera" type="button" class="btn btn-outline btn-sm" aria-label="Kleidungsfoto aufnehmen" title="Foto aufnehmen">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 7h4l2-3h6l2 3h4v14H3z"/><circle cx="12" cy="13" r="4"/></svg>
+          </button>
+          <input id="new-photo-capture" type="file" accept="image/jpeg,image/png,image/webp,image/gif" capture="environment" hidden />
+          <button id="new-photo-remove" type="button" class="btn btn-ghost btn-sm" aria-label="Ausgewähltes Foto entfernen" title="Foto entfernen" hidden>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 10v8m4-8v8"/></svg>
+          </button>
+        </div>
+        <button id="new-photo-cutout" type="button" class="btn btn-outline btn-sm" hidden>Hintergrund entfernen</button>
+        <p id="new-photo-status" role="status" aria-live="polite" class="text-sm">Du kannst die Angaben auch ohne Foto speichern. Maximal 20 MB.</p>
+      </section>
+      <div id="new-garment-error" class="alert alert-error" role="alert" hidden></div>
+      {{/unless}}
       <div class="form-control">
         <label class="label"
           ><span class="label-text">{{t 'lang.NAME'}}</span></label
@@ -148,3 +172,4 @@
     </form>
   </div>
 </main>
+{{#unless garment}}<script type="module" src="/js/garment-create.js"></script>{{/unless}}

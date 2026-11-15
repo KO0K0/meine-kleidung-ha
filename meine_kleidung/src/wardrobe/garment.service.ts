@@ -129,13 +129,18 @@ export class GarmentService {
   async create(dto: CreateGarmentDto, userId?: number): Promise<Garment> {
     let photo: File | undefined = undefined;
     if (dto.files) {
+      const photoFileName = `${randomUUID()}.webp`;
+      const uploads: Promise<unknown>[] = [];
       for await (const file of dto.files) {
         if (file.fieldname === 'photo') {
-          photo = await this.fileService.storeImageFromFileUpload(file, userId);
+          uploads.push(this.fileService.storeImageFromFileUpload(file, userId, photoFileName).then(stored => { photo = stored; }));
+        } else if (file.fieldname === 'nobgPhoto') {
+          uploads.push(this.fileService.storeNobgVariantFromStream(file.file, photoFileName));
         } else {
           file.file.resume();
         }
       }
+      await Promise.all(uploads);
     }
 
     const garment = this.garmentRepository.create({

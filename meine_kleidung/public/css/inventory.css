@@ -661,3 +661,28 @@
 #voice-error {
   color: #ffb4ac;
 }
+.new-garment-photo {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #494952;
+  border-radius: 16px;
+  background: #202024;
+}
+.new-garment-photo h2 { margin: 0; font-weight: 600; }
+.new-photo-preview {
+  display: grid;
+  place-items: center;
+  min-height: 160px;
+  border-radius: 12px;
+  background: #151518;
+  overflow: hidden;
+  text-align: center;
+  padding: 12px;
+  color: #c8c8d0;
+}
+.new-photo-preview img { max-width: 100%; max-height: 240px; object-fit: contain; }
+.new-photo-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.new-photo-file { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.new-photo-actions:focus-within { outline: 2px solid #8db8ff; outline-offset: 4px; border-radius: 8px; }
+.new-garment-photo [hidden], #new-garment-error[hidden] { display: none !important; }

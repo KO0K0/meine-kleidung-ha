@@ -84,6 +84,18 @@ let removeBackground = mod.removeBackground;
 
 import { openMaskEditor } from '/js/mask-editor.js';
 
+// Shared by the initial garment form and the existing photo editor.
+export const prepareGarmentPhoto = async (file, onProgress) => {
+  activeProgressHandler = onProgress;
+  try {
+    const square = await squarePadBlob(file);
+    const removed = await removeBackground(square, config);
+    return await openMaskEditor(square, removed);
+  } finally {
+    activeProgressHandler = null;
+  }
+};
+
 export const initBackgroundRemoval = async () => {
   try {
     mod.preload(config).then(() => {
