@@ -7,6 +7,7 @@ export interface StockBin {
   quantity: number;
 }
 export interface InventoryData {
+  captureReceipts?: Record<string, number>;
   locations: { id: string; name: string }[];
   stock: Record<string, StockBin[]>;
   preferences?: InventoryPreferences;

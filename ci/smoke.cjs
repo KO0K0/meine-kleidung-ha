@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const { randomBytes } = require('node:crypto');
+const { randomBytes, randomUUID } = require('node:crypto');
 const base = process.env.SMOKE_URL || 'http://127.0.0.1:3088';
 const [mode, stateFile] = process.argv.slice(2);
 async function ready() {
@@ -27,6 +27,13 @@ async function ready() {
     const garment = snapshot.garments.find(g => g.name === 'Container-Test'); assert(garment);
     const changed = await fetch(base + '/inventory/actions', { method: 'POST', headers: { Cookie: cookie, 'Content-Type': 'application/json', 'X-Inventory-Request': '1' }, body: JSON.stringify({ type: 'stock', revision: snapshot.revision, garmentId: garment.id, bins: [{ location: 'home-a', status: 'available', quantity: 3 }] }) });
     assert.equal(changed.status, 201);
+    const capture = new URLSearchParams({ name: 'Capture-Test', category: 'Pullover', initialLocation: 'home-b', initialQuantity: '2', captureToken: randomUUID() });
+    const captureRequest = () => fetch(base + '/wardrobe', { method: 'POST', redirect: 'manual', headers: { Cookie: cookie }, body: capture });
+    const firstCapture = await captureRequest(); assert.equal(firstCapture.status, 302);
+    const repeatCapture = await captureRequest(); assert.equal(repeatCapture.status, 302); assert.equal(repeatCapture.headers.get('location'), firstCapture.headers.get('location'));
+    const capturedSnapshot = await (await fetch(base + '/inventory/data', { headers: { Cookie: cookie } })).json();
+    const captured = capturedSnapshot.garments.filter(g => g.name === 'Capture-Test');
+    assert.equal(captured.length, 1); assert.deepEqual(captured[0].bins, [{ location: 'home-b', status: 'available', quantity: 2 }]);
     fs.writeFileSync(stateFile, JSON.stringify({ cookie, id: garment.id }), { mode: 0o600 });
   } else if (mode === 'verify') {
     const { cookie, id } = JSON.parse(fs.readFileSync(stateFile));

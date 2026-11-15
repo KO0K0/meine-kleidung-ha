@@ -1,5 +1,10 @@
 const form = document.getElementById('new-garment-form');
 if (form) {
+  let captureFlow = null;
+  if (new URLSearchParams(location.search).get('capture') === '1') {
+    const { initCapture } = await import('/js/capture-flow.js');
+    captureFlow = await initCapture(form);
+  }
   const input = document.getElementById('new-photo-input');
   const capture = document.getElementById('new-photo-capture');
   const preview = document.getElementById('new-photo-preview');
@@ -89,6 +94,7 @@ if (form) {
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (busy || form.dataset.labelScanBusy === 'true') return;
+    if (captureFlow && !captureFlow.beforeSubmit()) return;
     const data = new FormData(form);
     data.delete('photo');
     if (photo) data.append('photo', photo, photo.name);
@@ -103,7 +109,8 @@ if (form) {
       if (!response.redirected || !/^\/wardrobe\/\d+$/.test(destination.pathname)) {
         throw new Error('Unexpected response');
       }
-      window.location.assign(destination.href);
+      if (captureFlow) captureFlow.saved(destination, event.submitter?.dataset.captureFinish === 'true');
+      else window.location.assign(destination.href);
     } catch (cause) {
       error.textContent = 'Speichern konnte nicht bestätigt werden. Deine Eingaben bleiben hier erhalten. Prüfe bei unterbrochener Verbindung zuerst den Bestand, bevor du es erneut versuchst.';
       error.hidden = false;

@@ -3,6 +3,8 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { randomUUID } from 'node:crypto';
 import {
   ForbiddenException,
+  BadRequestException,
+  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
@@ -18,6 +20,8 @@ import { UpdateGarmentDto } from './dto/update-garment.dto';
 import { SearchGarmentDto } from './dto/search-garment.dto';
 import { GarmentCategory } from './garment-category.enum';
 import { WardrobeShareService } from '../wardrobe-share/wardrobe-share.service';
+import { Inventory } from '../dal/entity/inventory.entity';
+import { initialInventory } from './inventory.logic';
 
 const CANONICAL_SIZES = [
   'XX-Small',
@@ -129,6 +133,12 @@ export class GarmentService {
   }
 
   async create(dto: CreateGarmentDto, userId?: number): Promise<Garment> {
+    const em = this.garmentRepository.getEntityManager();
+    if (dto.captureToken) {
+      const existing = await em.findOne(Inventory, { ownerKey: userId ?? 0 });
+      const saved = existing?.data.captureReceipts?.[dto.captureToken];
+      if (saved) return this.findOne(saved, userId);
+    }
     let photo: File | undefined = undefined;
     if (dto.files) {
       const photoFileName = `${randomUUID()}.webp`;
@@ -164,7 +174,24 @@ export class GarmentService {
       garment.owner = user as any;
     }
 
-    await this.garmentRepository.getEntityManager().persistAndFlush(garment);
+    if (dto.initialLocation && dto.captureToken) {
+      return em.transactional(async tx => {
+        const ownerKey = userId ?? 0;
+        await tx.upsert(Inventory, { ownerKey, revision: 0, data: initialInventory() }, { onConflictAction: 'ignore', onConflictFields: ['ownerKey'] });
+        const ledger = await tx.findOneOrFail(Inventory, { ownerKey });
+        await tx.refresh(ledger);
+        const previous = ledger.data.captureReceipts?.[dto.captureToken!];
+        if (previous) return tx.findOneOrFail(Garment, { id: previous, owner: userId ?? null });
+        if (!ledger.data.locations.some(place => place.id === dto.initialLocation)) throw new BadRequestException('Dieser Ort ist nicht mehr vorhanden. Bitte den Ort neu auswählen.');
+        await tx.persistAndFlush(garment);
+        const receipts = Object.fromEntries(Object.entries({ ...ledger.data.captureReceipts, [dto.captureToken!]: garment.id }).slice(-100));
+        const data = { ...ledger.data, captureReceipts: receipts, stock: { ...ledger.data.stock, [garment.id]: [{ location: dto.initialLocation!, status: 'available' as const, quantity: dto.initialQuantity ?? 1 }] } };
+        const changed = await tx.nativeUpdate(Inventory, { ownerKey, revision: ledger.revision }, { data, revision: ledger.revision + 1 });
+        if (changed !== 1) throw new ConflictException('Der Bestand wurde inzwischen geändert. Bitte erneut speichern.');
+        return garment;
+      });
+    }
+    await em.persistAndFlush(garment);
     return garment;
   }
 

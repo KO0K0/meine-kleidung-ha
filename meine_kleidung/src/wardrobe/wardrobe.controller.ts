@@ -148,6 +148,9 @@ export class WardrobeController {
       notes?: string;
       washingDetails?: string;
       dateAquired?: string;
+      initialLocation?: string;
+      initialQuantity?: string;
+      captureToken?: string;
     },
     @Req() req: FastifyRequest,
     @Res() reply: FastifyReply,
@@ -166,7 +169,7 @@ export class WardrobeController {
     const photos: MultipartFile[] = [];
     if (req.isMultipart()) {
       body = { category: '' };
-      const fields = new Set(['name', 'category', 'brand', 'color', 'size', 'material', 'articleNumber', 'notes', 'washingDetails', 'dateAquired']);
+      const fields = new Set(['name', 'category', 'brand', 'color', 'size', 'material', 'articleNumber', 'notes', 'washingDetails', 'dateAquired', 'initialLocation', 'initialQuantity', 'captureToken']);
       for await (const part of req.parts({ limits: { files: 2, fields: 40, parts: 42, fileSize: 20 * 1024 * 1024 } })) {
         if (part.type === 'file') {
           const bytes = await part.toBuffer();
@@ -201,9 +204,19 @@ export class WardrobeController {
           .map((c) => c.trim())
           .filter(Boolean) ?? []);
 
+    const capture = body.initialLocation !== undefined || body.captureToken !== undefined;
+    const quantity = Number(body.initialQuantity ?? 1);
+    if (capture && (!body.initialLocation || !/^[a-z0-9-]{1,60}$/i.test(body.initialLocation) ||
+        !/^[a-f0-9-]{36}$/i.test(body.captureToken ?? '') || !Number.isSafeInteger(quantity) || quantity < 1 || quantity > 10000)) {
+      throw new BadRequestException('Bitte Ort und eine ganze Menge zwischen 1 und 10000 angeben.');
+    }
+
     const garment = await this.garmentService.create(
       {
         name: body.name,
+        initialLocation: capture ? body.initialLocation : undefined,
+        initialQuantity: capture ? quantity : undefined,
+        captureToken: capture ? body.captureToken : undefined,
         category: body.category,
         brand: body.brand,
         color: rawColors.join(','),

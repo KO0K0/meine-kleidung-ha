@@ -1,5 +1,14 @@
 # Änderungen
 
+## 0.4.0
+
+- Separater Modus „Schrank erfassen“ unter den Werkzeugen am Ende der Übersicht; „Artikel hinzufügen“ bleibt unverändert.
+- Geführte Erfassung: Kategorie und Ort einmal wählen, danach Foto/Etikett und kompakte Angaben je Artikel.
+- „Speichern & nächster“ behält Kategorie und Ort in der aktuellen Browsersitzung. Foto und individuelle Angaben werden geleert; die Menge beginnt wieder bei 1.
+- Optionale Zusatzfelder einklappbar, Kategorien-/Ortswechsel und „Speichern & beenden“.
+- Artikel, Ort und Menge werden atomar gespeichert; wiederholte Speicherversuche desselben Artikels erzeugen keine Duplikate.
+- Trennlinie unter der Hauptnavigation entfernt.
+
 ## 0.3.0
 
 - Etikettfotos direkt beim Anlegen, Bearbeiten und Klonen lokal im Browser auslesen; keine externen OCR-Dienste.
