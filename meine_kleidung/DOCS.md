@@ -38,3 +38,10 @@ Im Formular „Etikett scannen“ aufklappen, bis zu vier Etikettfotos auswähle
 Erkannten Text kannst du korrigieren und über „Vorschläge ermitteln“ erneut auswerten. Die gewünschte Größe auswählen und die Angaben ausdrücklich übernehmen. Bestehende Feldwerte sind nicht vorausgewählt. Anschließend das Kleidungsstück speichern. Halbe und Viertelgrößen wie 15½, 15¾ oder 15 1/4 bleiben erhalten; die App rechnet keine Größensysteme um. Gedruckte Pflegehinweise können übernommen werden; Waschzeichen und eine visuelle Erkennung des Kleidungsstücktyps sind nicht Bestandteil des Scans.
 
 Material und Artikelnummer werden mit gesichert. Sicherungen älterer Versionen bleiben einlesbar; Sicherungen mit den neuen Feldern benötigen Version 0.3.0 oder neuer.
+
+
+## Viele Kleidungsstücke erfassen (ab 0.4.0)
+
+Am Ende der Übersicht „Schrank erfassen“ aufklappen und die Erfassung starten. Kategorie (etwa Pullover) und Ort einmal festlegen. Anschließend pro Artikel Foto und optional Etikett auswählen, im nächsten Schritt Angaben prüfen und „Speichern & nächster“ drücken. Fotos sind optional. Die Menge beginnt für jeden Artikel bei 1; nur identische Exemplare als höhere Menge zusammenfassen.
+
+Kategorie und Ort bleiben in dieser Browsersitzung erhalten. Weitere Angaben wie Pflege, Material und Artikelnummer können im Prüfschritt aufgeklappt werden. Für den nächsten Kleidungsstapel oben „Kategorie / Ort ändern“ wählen. Mit „Speichern & beenden“ wird der letzte Artikel gespeichert und die Übersicht geöffnet. Individuelle Entwürfe/Fotos werden nicht über ein Neuladen der Seite hinweg gespeichert. Bei ungespeicherten Eingaben erscheint eine Warnung vor dem Verlassen.
