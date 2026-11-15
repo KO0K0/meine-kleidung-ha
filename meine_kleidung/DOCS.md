@@ -52,3 +52,42 @@ Kategorie und Ort bleiben in dieser Browsersitzung erhalten. Weitere Angaben wie
 Das Dreipunktmenü oben enthält Schrank-Erfassung, Sicherung/Import und das Konto. Am Handy liegt die Hauptnavigation unten; Filter lassen sich ausklappen. Ein Klick auf ein Kleidungsbild öffnet das Artikelpanel mit „Mengen & Orte“ und „Details & Foto“. Die Bearbeitung von Angaben und Fotos ist von dort erreichbar. Suche und Auswahl bleiben bei der Rückkehr erhalten.
 
 Animationen berücksichtigen die Systemeinstellung für reduzierte Bewegung. Die Anwendung verwendet weiterhin ihre vorhandene Datenbank; das Designupdate benötigt keinen Datenimport.
+
+
+# Kleidungsassistent: Anbietervergleich
+
+Pro Anbieter dieselben Aufträge mit „Neues Gespräch“ testen. Für Rückfragen innerhalb eines Tests im Gespräch bleiben. Die App zeigt Anbieter/Modell und Antwortzeit; Änderungen erst nach Prüfung bestätigen.
+
+## Eigene Schlüssel
+
+In der HA-App-Konfiguration sind optional Groq, Cloudflare, OpenRouter und Mistral konfigurierbar. Jeder HA-Server verwendet seine eigenen Schlüssel und Kontingente. Nicht hier im Chat oder auf GitHub eintragen. Danach die HA-App neu starten. Der Assistent erscheint im Dreipunktmenü unter „KI-Assistent · ausprobieren“.
+
+- Groq: `assistant_groq_key`, optional `assistant_groq_model` (Standard `openai/gpt-oss-20b`).
+- Cloudflare: `assistant_cloudflare_key`, `assistant_cloudflare_account`, optional `assistant_cloudflare_model` (Standard `@cf/meta/llama-3.1-8b-instruct`). Der Account ist eine 32-stellige Account-ID, keine Tunnel- oder Zonen-ID. Token mit Workers-AI-Berechtigung für dieses Konto.
+- OpenRouter: `assistant_openrouter_key`, optional `assistant_openrouter_model` (Standard `openrouter/free`).
+- Mistral: `assistant_mistral_key`, optional `assistant_mistral_model` (Standard `mistral-small-latest`).
+
+Die Verfügbarkeit kostenloser Modelle und Kontingente hängt vom jeweiligen Konto ab. Die App aktiviert keinen Bezahlplan und wechselt nicht automatisch auf kostenpflichtige Anbieter. Ein selbst gewähltes Modell kann auf einem bereits zahlungspflichtigen Konto Kosten verursachen. Bei aufgebrauchtem Kontingent erscheint eine Meldung; kein automatischer Wiederholungsversuch. Die Reset-Zeit richtet sich nach dem beim Anbieter erreichten Minuten-, Tages- oder Monatslimit.
+
+## Gemeinsame Aufgaben
+
+Namen und Orte durch die tatsächlich vorhandenen Einträge ersetzen.
+
+1. „Wo liegt meine Carhartt-Jeans?“ – nur vorhandene Bestände nennen.
+2. „Was habe ich in Wohnung B?“ – Artikel und Mengen dort anzeigen.
+3. „Zwei Zip-Hoodies von Wohnung A nach Wohnung B.“ – Quelle, Ziel, Menge korrekt vorbereiten.
+4. Danach „Nein, nur einen.“ – Vorschau korrigieren, noch nichts ausführen.
+5. „Bring den Hoodie rüber.“ – fehlende Orte/Artikel erfragen statt raten.
+6. „Mach einen Pullover in die Wäsche.“ – bei mehreren Kandidaten nachfragen.
+7. „Die Wäsche in Wohnung A ist fertig.“ – alle dortigen Wäschebestände auf verfügbar vorbereiten.
+8. „Verschiebe 100 Jeans nach Wohnung B.“ – unmögliche Mengen ablehnen.
+9. „Lösche den Hoodie.“ – keine Löschaktion anbieten.
+10. „Benenne den Hoodie um.“ – keine Bearbeitungsaktion anbieten.
+
+Je Fall notieren: richtiger Artikel, richtige Menge/Orte, sinnvolle Rückfrage, Antwortzeit. Günstige Limits helfen wenig, wenn der Anbieter wiederholt falsche Vorschläge macht.
+
+## Verarbeitung
+
+Das Sprachmodell erhält den eingegebenen Text, den aktuellen Gesprächsverlauf sowie Artikel-IDs, Namen, Kategorie, Marke, Größe, Farbe, Orte und Mengen. Fotos, freie Notizen und Schlüssel werden nicht als Kontext gesendet. Der Schlüssel wird nur vom HA-Backend für den ausgewählten Anbieter verwendet; im Browser erscheint nur, ob er eingerichtet ist. Die Zusatzfunktion verändert keine Kleidungseinträge und benötigt zum Testen keine Fotos.
+
+Die Anbindung wurde mit simulierten Anbieterantworten geprüft. Ein echter Qualitäts-/Geschwindigkeitsvergleich erfolgt erst mit eingerichteten eigenen API-Schlüsseln. Kein Qualitätsgewinner ist bisher bestimmt.

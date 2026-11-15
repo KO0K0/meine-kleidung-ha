@@ -1,5 +1,15 @@
 # Änderungen
 
+## 0.6.0
+
+- Optionaler Kleidungsassistent als Testfunktion im Dreipunktmenü; bestehende Sprachliste bleibt erhalten.
+- Eigene API-Schlüssel pro HA-Installation für Groq, Cloudflare, OpenRouter und Mistral; Modellwahl optional.
+- Rückfragen und Korrekturen im Gespräch, Bestandsabfragen und Vorschauen für Verschieben/Wäsche.
+- Keine Bearbeitung, Neuanlage oder Löschung von Kleidungseinträgen durch den Assistenten.
+- Modellvorschläge werden vor der Anzeige gegen echte Artikel, Orte und Mengen geprüft; Ausführung ausschließlich nach Bestätigung und mit Versionsprüfung.
+- Anbieterlimit-/Zugriffsfehler ohne automatische Wiederholungen; Schlüssel bleiben im Backend.
+- Gemeinsamer Testplan und Antwortzeitanzeige für den Vergleich. Anbieteradapter mit simulierten Antworten geprüft; reale Modellqualität noch nicht verglichen.
+
 ## 0.5.0
 
 - Einheitliches responsives Darkmode-Design; Navigation unten am Handy und seitlich am Desktop.
