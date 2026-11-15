@@ -90,7 +90,7 @@ export class AuthController {
         maxAge: 365 * 24 * 60 * 60 * 1000, // 365 days
         httpOnly: true, // Prevents client-side JS from reading it
       });
-      reply.redirect('/auth/profile', 302);
+      reply.redirect('/inventory', 302);
     } catch (error) {
       this.logger.warn(error);
       return reply.view('auth/login', {

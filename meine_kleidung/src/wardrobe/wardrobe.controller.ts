@@ -44,61 +44,8 @@ export class WardrobeController {
   }
 
   @Get()
-  @Render('wardrobe/index')
-  async index(
-    @Req() req: FastifyRequest,
-    @Query() query: SearchGarmentDto,
-    @Query('ownerId') ownerId: string | undefined,
-    @I18n() i18n: I18nContext,
-  ) {
-    const userId = this.userId(req);
-    let viewOwner: number | undefined;
-    let sharedWardrobes: any[] = [];
-    let canEdit = true;
-
-    if (userId != null) {
-      sharedWardrobes = await this.shareService.getInboundShares(userId);
-      sharedWardrobes = sharedWardrobes.map((s) => ({
-        id: s.id,
-        grantorId: s.grantor.unwrap().id,
-        grantorName: s.grantor.unwrap().firstName || s.grantor.unwrap().email,
-        permission: s.permission,
-      }));
-    }
-
-    if (ownerId && userId != null) {
-      viewOwner = parseInt(ownerId, 10);
-      if (viewOwner === userId) {
-        viewOwner = undefined;
-      } else {
-        const canView = await this.shareService.canView(userId, viewOwner);
-        if (!canView) throw new ForbiddenException();
-        const perm = await this.shareService.getSharePermission(
-          userId,
-          viewOwner,
-        );
-        canEdit = perm === SharePermission.MANAGE;
-      }
-    }
-
-    const [garments, filters] = await Promise.all([
-      this.garmentService.findAll(userId, query, viewOwner),
-      this.garmentService.findAvailableFilters(viewOwner ?? userId),
-    ]);
-    const availableCategories = filters.categories.map((value) => ({
-      value,
-      label: this.garmentService.resolveCategoryLabel(value, i18n),
-    }));
-    return {
-      garments,
-      availableCategories,
-      colors: Object.values(GarmentColor),
-      availableSizes: filters.sizes,
-      search: query,
-      sharedWardrobes,
-      viewOwner: viewOwner ?? null,
-      canEdit,
-    };
+  index(@Res() reply: FastifyReply) {
+    return reply.redirect('/inventory', 302);
   }
 
   @Get('new')

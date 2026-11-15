@@ -22,13 +22,13 @@
   </div>
   {{/if}}
 
-  <form
+  <form hx-target="body" hx-swap="outerHTML"
     hx-post="/auth/delete-account"
     hx-indicator="#loading"
     hx-trigger="submit"
     hx-confirm="{{t 'lang.DELETE_ACCOUNT_CONFIRMATION'}}"
   >
-    <fieldset
+    <fieldset hx-target="body" hx-swap="outerHTML"
       class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
     >
       <legend class="fieldset-legend">{{t 'lang.DELETE_ACCOUNT'}}</legend>

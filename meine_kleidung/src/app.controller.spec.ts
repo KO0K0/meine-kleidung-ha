@@ -17,12 +17,10 @@ describe('AppController', () => {
   });
 
   describe('index', () => {
-    it('should return a context object with translated pageTitle', () => {
-      const i18n = { t: (key: string) => key } as unknown as I18nContext;
-      expect(appController.index(i18n)).toEqual({
-        pageTitle: 'lang.PAGE_TITLE_HOME',
-        ogTitle: 'lang.PAGE_TITLE_HOME',
-      });
+    it('opens the inventory rather than the upstream landing page', () => {
+      const reply = { redirect: jest.fn() };
+      appController.index(reply as any);
+      expect(reply.redirect).toHaveBeenCalledWith('/inventory', 302);
     });
   });
 });

@@ -1,5 +1,12 @@
 # Änderungen
 
+## 0.6.1
+
+- Startadresse und bisherige /wardrobe-Übersicht öffnen jetzt direkt /inventory; keine alte Libre-Closet-Werbeseite im normalen Einstieg.
+- Anmeldung verwendet einen vollständigen Seitenwechsel und führt direkt zum Bestand. Verhindert ineinander verschachtelte Konto-/Anmeldeseiten.
+- Andere Kontoformulare ersetzen bei HTMX-Antworten die gesamte Seite statt Formulare mit vollständigen Seiten zu verschachteln.
+- Assistenten-Rückfragen sollen Artikelnamen statt interner IDs verwenden.
+
 ## 0.6.0
 
 - Optionaler Kleidungsassistent als Testfunktion im Dreipunktmenü; bestehende Sprachliste bleibt erhalten.

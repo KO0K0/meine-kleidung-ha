@@ -1,8 +1,8 @@
 {{>navbar}}
 
 <main class="account-page">
-  <form hx-post="/auth/reset-code" hx-indicator="#loading" hx-trigger="submit">
-    <fieldset
+  <form hx-target="body" hx-swap="outerHTML" hx-post="/auth/reset-code" hx-indicator="#loading" hx-trigger="submit">
+    <fieldset hx-target="body" hx-swap="outerHTML"
       class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
       hx-post="/auth/validate/reset-code"
       hx-indicator="#loading"

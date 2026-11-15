@@ -23,8 +23,8 @@
   </div>
   {{/if}}
 
-  <form hx-post="/auth/reset" hx-indicator="#loading" hx-trigger="submit">
-    <fieldset
+  <form hx-target="body" hx-swap="outerHTML" hx-post="/auth/reset" hx-indicator="#loading" hx-trigger="submit">
+    <fieldset hx-target="body" hx-swap="outerHTML"
       class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
     >
       <legend class="fieldset-legend">{{t 'lang.RESET_PASSWORD'}}</legend>
