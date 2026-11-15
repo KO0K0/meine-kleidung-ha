@@ -781,3 +781,10 @@ html :is(.ms-placeholder,.ms-count,.ms-empty,.ms-chevron) { color: var(--ui-mute
 html .ms-pill-remove { min-width: 32px; min-height: 32px; opacity: 1; }
 html .editor-actions { position: sticky; bottom: var(--keyboard-inset,0px); padding: 12px 0 max(12px,env(safe-area-inset-bottom)); background: var(--ui-surface); z-index: 5; }
 @media (prefers-reduced-motion:reduce) { html *, html *::before, html *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+html .assistant-history { max-height: 30dvh; overflow: auto; padding: 12px; border-radius: 12px; background: var(--ui-bg); margin-block: 16px; }
+html #assistant-text { width: 100%; min-height: 100px; }
+html #assistant-result p { padding: 12px; background: var(--ui-selected); border-radius: 12px; }
+html #assistant-form { margin-top: 20px; }
+html #assistant-status { overflow-wrap: anywhere; }
+html #assistant-result { max-height: 35dvh; overflow: auto; }

@@ -18,6 +18,7 @@ import { Inventory } from '../dal/entity/inventory.entity';
 import { InventoryController } from './inventory.controller';
 import { InventoryService } from './inventory.service';
 import { InventoryBackupService } from './inventory-backup.service';
+import { AssistantService } from './assistant.service';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { InventoryBackupService } from './inventory-backup.service';
     CalendarService,
     InventoryService,
     InventoryBackupService,
+    AssistantService,
   ],
   exports: [GarmentService, OutfitService, CalendarService],
 })

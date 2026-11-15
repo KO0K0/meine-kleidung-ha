@@ -14,6 +14,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ConditionalAuthGuard } from '../auth/conditional-auth.guard';
 import { InventoryService } from './inventory.service';
 import type { InventoryAction } from './inventory.logic';
+import { AssistantService } from './assistant.service';
 import {
   backupLimit,
   InventoryBackupService,
@@ -25,6 +26,7 @@ export class InventoryController {
   constructor(
     private readonly inventory: InventoryService,
     private readonly backups: InventoryBackupService,
+    private readonly assistant: AssistantService,
   ) {}
 
   private userId(req: FastifyRequest): number | undefined {
@@ -55,6 +57,19 @@ export class InventoryController {
     )
       throw new ForbiddenException();
     return this.inventory.change(body, this.userId(req));
+  }
+
+  @Get('assistant/providers')
+  assistantProviders(@Res({ passthrough: true }) reply: FastifyReply) {
+    reply.header('Cache-Control', 'no-store');
+    return this.assistant.providers();
+  }
+
+  @Post('assistant/understand')
+  understand(@Req() req: FastifyRequest, @Body() body: unknown, @Res({ passthrough: true }) reply: FastifyReply) {
+    if (req.headers['x-inventory-request'] !== '1' || !req.headers['content-type']?.startsWith('application/json')) throw new ForbiddenException();
+    reply.header('Cache-Control', 'no-store');
+    return this.assistant.understand(body, this.userId(req));
   }
 
   @Get('backup')

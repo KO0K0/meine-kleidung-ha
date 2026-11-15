@@ -886,11 +886,13 @@
       !$('stock-dialog').open &&
       !$('move-preview').open &&
       !$('voice-dialog').open &&
+      !$('assistant-dialog').open &&
       tab !== 'places' &&
       !document.activeElement.matches('input,select')
     )
       refresh();
   }, 30000);
+  window.ClosetAssistant.init({ change, getData: () => data });
   const contextKey = 'closet-view-context-v1';
   window.addEventListener('pagehide', () => {
     try { sessionStorage.setItem(contextKey, JSON.stringify({ time: Date.now(), tab, query: $('inventory-search').value, location: $('inventory-location').value, category: $('inventory-category').value, status: $('inventory-status').value, selected: [...selected], scroll: window.scrollY })); } catch {}

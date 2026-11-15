@@ -20,6 +20,15 @@ const child = spawn(process.execPath, ['dist/main.js'], {
     DATABASE_SCHEMA: path.join(dataPath, 'sqlite3.db'), FILE_STORAGE_TYPE: 'local',
     AUTH_ENABLED: 'true', DISABLE_REGISTRATION: String(!options.allow_registration),
     SUPPORTER_PROMPT_ENABLED: 'false', PWA_ENABLED: 'false',
+    ASSISTANT_GROQ_KEY: options.assistant_groq_key || '',
+    ASSISTANT_GROQ_MODEL: options.assistant_groq_model || '',
+    ASSISTANT_CLOUDFLARE_KEY: options.assistant_cloudflare_key || '',
+    ASSISTANT_CLOUDFLARE_ACCOUNT: options.assistant_cloudflare_account || '',
+    ASSISTANT_CLOUDFLARE_MODEL: options.assistant_cloudflare_model || '',
+    ASSISTANT_OPENROUTER_KEY: options.assistant_openrouter_key || '',
+    ASSISTANT_OPENROUTER_MODEL: options.assistant_openrouter_model || '',
+    ASSISTANT_MISTRAL_KEY: options.assistant_mistral_key || '',
+    ASSISTANT_MISTRAL_MODEL: options.assistant_mistral_model || '',
     ACCESS_TOKEN_SECRET: fs.readFileSync(secretPath, 'utf8') },
 });
 for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => child.kill(signal));

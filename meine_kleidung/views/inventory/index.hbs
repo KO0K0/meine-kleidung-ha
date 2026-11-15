@@ -32,7 +32,7 @@
     <button data-tab="luggage" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="16" height="15" rx="3"/><path d="M9 6V3h6v3M9 10v7m6-7v7"/></svg><span>Gepäck</span></button>
     <button data-tab="places" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><span>Orte</span></button>
   </nav>
-  <div id="closet-tools" class="closet-tools" popover><h2>Dein Schrank</h2>  <details class="backup-tools capture-tools">
+  <div id="closet-tools" class="closet-tools" popover><h2>Dein Schrank</h2><button id="open-assistant" type="button">KI-Assistent · ausprobieren</button>  <details class="backup-tools capture-tools">
     <summary>Schrank erfassen</summary>
     <p>Viele Kleidungsstücke nacheinander aufnehmen. Kategorie und Ort einmal wählen und für die nächsten Artikel beibehalten.</p>
     <a class="primary" href="/wardrobe/new?capture=1">Schrank-Erfassung starten</a>
@@ -276,5 +276,16 @@
     Jetzt verschieben
   </button>
 </dialog>
+<dialog id="assistant-dialog" class="stock-dialog" aria-labelledby="assistant-title" hx-boost="false">
+<header><h2 id="assistant-title">Kleidungsassistent</h2><button id="assistant-close" type="button" aria-label="Assistent schließen">×</button></header>
+<p>Bestand finden, Kleidung verschieben und Wäsche verwalten. Änderungen bestätigst du selbst.</p>
+<label for="assistant-provider">Anbieter</label><select id="assistant-provider"></select>
+<p id="assistant-status" role="status" aria-live="polite"></p>
+<div id="assistant-history" class="assistant-history" role="log" aria-label="Gespräch"></div>
+<div id="assistant-result" aria-label="Ergebnis und Auftragsvorschau"></div>
+<button id="assistant-confirm" class="primary" type="button" hidden>Auftrag bestätigen</button>
+<form id="assistant-form"><label for="assistant-text">Auftrag oder Antwort</label><textarea id="assistant-text" rows="3" maxlength="4000" placeholder="Zwei Hoodies von Wohnung A nach Wohnung B …"></textarea><p>Zum Sprechen das Mikrofon deiner Tastatur verwenden.</p><button id="assistant-send" class="primary" type="submit">Verstehen</button><button id="assistant-new" type="button">Neues Gespräch</button></form>
+</dialog>
+<script src="/js/assistant.js" defer></script>
 <script src="/js/voice-list.js" defer></script>
 <script src="/js/inventory.js" defer></script>

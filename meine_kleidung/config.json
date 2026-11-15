@@ -1,6 +1,6 @@
 {
   "name": "Meine Kleidung",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "slug": "meine_kleidung",
   "description": "Libre Closet mit Wohnorten, Mengen, Gepäck und Wäscheverwaltung",
   "arch": [
@@ -20,11 +20,29 @@
   "webui": "http://[HOST]:[PORT:3000]/inventory",
   "options": {
     "allow_registration": true,
-    "site_url": "http://localhost:3088"
+    "site_url": "http://localhost:3088",
+    "assistant_groq_key": "",
+    "assistant_groq_model": "",
+    "assistant_cloudflare_key": "",
+    "assistant_cloudflare_model": "",
+    "assistant_openrouter_key": "",
+    "assistant_openrouter_model": "",
+    "assistant_mistral_key": "",
+    "assistant_mistral_model": "",
+    "assistant_cloudflare_account": ""
   },
   "schema": {
     "allow_registration": "bool",
-    "site_url": "url"
+    "site_url": "url",
+    "assistant_groq_key": "password?",
+    "assistant_groq_model": "str?",
+    "assistant_cloudflare_key": "password?",
+    "assistant_cloudflare_model": "str?",
+    "assistant_openrouter_key": "password?",
+    "assistant_openrouter_model": "str?",
+    "assistant_mistral_key": "password?",
+    "assistant_mistral_model": "str?",
+    "assistant_cloudflare_account": "str?"
   },
   "image": "ghcr.io/ko0k0/meine-kleidung-ha",
   "url": "https://github.com/KO0K0/meine-kleidung-ha"
