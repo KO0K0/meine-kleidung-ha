@@ -12,7 +12,7 @@
         $('closet-tools').hidePopover?.();
         dialog.showModal();
         try {
-          const response = await fetch('/inventory/assistant/providers', { cache: 'no-store' });
+          const response = await fetch('/inventory/assistant/providers', { headers: { Accept: 'application/json' }, cache: 'no-store' });
           if (!response.ok) throw Error('Bitte anmelden und erneut öffnen.');
           const providers = await response.json();
           const placeholder = document.createElement('option'); placeholder.value = ''; placeholder.textContent = providers.some(p => p.configured) ? 'Anbieter auswählen' : 'Noch kein Anbieter eingerichtet';
@@ -35,7 +35,8 @@
         say('Du:', text); running = true; $('assistant-send').disabled = true; $('assistant-new').disabled = true; $('assistant-provider').disabled = true;
         $('assistant-status').textContent = 'Verstehe deinen Auftrag …'; const start = performance.now();
         try {
-          const response = await fetch('/inventory/assistant/understand', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Inventory-Request': '1' }, body: JSON.stringify({ provider, turns: messages }) });
+          const response = await fetch('/inventory/assistant/understand', { method: 'POST', headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Inventory-Request': '1' }, body: JSON.stringify({ provider, turns: messages }) });
+          if (!response.headers.get('content-type')?.includes('application/json')) throw Error('Keine lesbare Antwort erhalten. Bitte Anmeldung und Verbindung prüfen und erneut versuchen.');
           const result = await response.json(); if (!response.ok) throw Error(result.message || 'Anfrage fehlgeschlagen.');
           turns = [...messages, { role: 'assistant', content: result.interpretation }]; $('assistant-text').value = '';
           $('assistant-status').textContent = result.model + ' · ' + ((performance.now() - start) / 1000).toFixed(1) + ' s';

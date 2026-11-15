@@ -20,7 +20,14 @@ async function ready() {
     const password = 'Test1-' + randomBytes(24).toString('hex');
     const response = await fetch(base + '/auth/register', { method: 'POST', redirect: 'manual', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ email: 'container-test@example.com', password, confirmPassword: password }) });
     assert.equal(response.status, 302, 'Registration must succeed');
+    const root = await fetch(base + '/', { redirect: 'manual' }); assert.equal(root.status, 302); assert.equal(root.headers.get('location'), '/inventory');
+    const login = await fetch(base + '/auth/login'); const loginHtml = await login.text();
+    assert.equal((loginHtml.match(/class="app-header"/g) || []).length, 1);
+    assert(loginHtml.includes('method="POST" action="/auth/login" hx-boost="false"'));
+    const signIn = await fetch(base + '/auth/login', { method: 'POST', redirect: 'manual', body: new URLSearchParams({ email: 'container-test@example.com', password }) });
+    assert.equal(signIn.status, 302); assert.equal(signIn.headers.get('location'), '/inventory');
     const cookie = response.headers.get('set-cookie')?.split(';')[0]; assert(cookie);
+    const wardrobe = await fetch(base + '/wardrobe', { redirect: 'manual', headers: { Cookie: cookie } }); assert.equal(wardrobe.status, 302); assert.equal(wardrobe.headers.get('location'), '/inventory');
     const created = await fetch(base + '/wardrobe', { method: 'POST', redirect: 'manual', headers: { Cookie: cookie, 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ name: 'Container-Test', category: 'Kleidung', material: '100 % Baumwolle', articleNumber: 'TEST-123', size: 'Kragen 15¾″' }) });
     assert.equal(created.status, 302, 'Garment creation must succeed');
     const snapshot = await (await fetch(base + '/inventory/data', { headers: { Cookie: cookie } })).json();

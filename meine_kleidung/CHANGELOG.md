@@ -1,5 +1,10 @@
 # Änderungen
 
+## 0.6.2
+
+- Assistent fordert JSON-Fehlerantworten an und zeigt verständliche Meldungen statt HTML/JSON-Parserfehlern.
+- Release-Prüfung kontrolliert Startadresse, alte Schrankadresse und Anmeldung inklusive Weiterleitung zum Bestand.
+
 ## 0.6.1
 
 - Startadresse und bisherige /wardrobe-Übersicht öffnen jetzt direkt /inventory; keine alte Libre-Closet-Werbeseite im normalen Einstieg.
