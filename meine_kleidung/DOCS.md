@@ -29,3 +29,12 @@ Die eigene Webadresse funktioniert auf iPhone, PC und Mac. Einbettung in die HA-
 - Download verweigert: das GitHub-Containerpaket muss öffentlich sein.
 - Startfehler: App-Protokoll in Home Assistant prüfen. Keine Schlüssel oder Datenbanksicherungen öffentlich posten.
 - Registrierung nicht möglich: zum Anlegen des ersten Kontos `allow_registration` einschalten und neu starten.
+
+
+## Etikett-Scan (ab 0.3.0)
+
+Im Formular „Etikett scannen“ aufklappen, bis zu vier Etikettfotos auswählen oder aufnehmen und „Text erkennen“ drücken. Bei Bedarf Fotos vorher drehen. Die Texterkennung läuft auf dem aktuellen Handy oder Computer; Fotos werden weder an OCR-Dienste gesendet noch als Etikettbilder gespeichert. Sprachmodelle werden von der eigenen App geladen und können im Browser zwischengespeichert werden.
+
+Erkannten Text kannst du korrigieren und über „Vorschläge ermitteln“ erneut auswerten. Die gewünschte Größe auswählen und die Angaben ausdrücklich übernehmen. Bestehende Feldwerte sind nicht vorausgewählt. Anschließend das Kleidungsstück speichern. Halbe und Viertelgrößen wie 15½, 15¾ oder 15 1/4 bleiben erhalten; die App rechnet keine Größensysteme um. Gedruckte Pflegehinweise können übernommen werden; Waschzeichen und eine visuelle Erkennung des Kleidungsstücktyps sind nicht Bestandteil des Scans.
+
+Material und Artikelnummer werden mit gesichert. Sicherungen älterer Versionen bleiben einlesbar; Sicherungen mit den neuen Feldern benötigen Version 0.3.0 oder neuer.
