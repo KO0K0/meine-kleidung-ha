@@ -60,12 +60,12 @@ Pro Anbieter dieselben Aufträge mit „Neues Gespräch“ testen. Für Rückfra
 
 ## Eigene Schlüssel
 
-In der HA-App-Konfiguration sind optional Groq, Cloudflare, OpenRouter und Mistral konfigurierbar. Jeder HA-Server verwendet seine eigenen Schlüssel und Kontingente. Nicht hier im Chat oder auf GitHub eintragen. Danach die HA-App neu starten. Der Assistent erscheint im Dreipunktmenü unter „KI-Assistent · ausprobieren“.
+In der HA-App-Konfiguration sind optional Groq, Cloudflare, OpenRouter und Google AI Studio (Gemini) konfigurierbar. Jeder HA-Server verwendet seine eigenen Schlüssel und Kontingente. Nicht hier im Chat oder auf GitHub eintragen. Danach die HA-App neu starten. Der Assistent erscheint im Dreipunktmenü unter „KI-Assistent · ausprobieren“.
 
 - Groq: `assistant_groq_key`, optional `assistant_groq_model` (Standard `openai/gpt-oss-20b`).
 - Cloudflare: `assistant_cloudflare_key`, `assistant_cloudflare_account`, optional `assistant_cloudflare_model` (Standard `@cf/meta/llama-3.1-8b-instruct`). Der Account ist eine 32-stellige Account-ID, keine Tunnel- oder Zonen-ID. Token mit Workers-AI-Berechtigung für dieses Konto.
 - OpenRouter: `assistant_openrouter_key`, optional `assistant_openrouter_model` (Standard `openrouter/free`).
-- Mistral: `assistant_mistral_key`, optional `assistant_mistral_model` (Standard `mistral-small-latest`).
+- Google AI Studio (Gemini): `assistant_gemini_key`, optional `assistant_gemini_model` (Standard `gemini-2.5-flash-lite`).
 
 Die Verfügbarkeit kostenloser Modelle und Kontingente hängt vom jeweiligen Konto ab. Die App aktiviert keinen Bezahlplan und wechselt nicht automatisch auf kostenpflichtige Anbieter. Ein selbst gewähltes Modell kann auf einem bereits zahlungspflichtigen Konto Kosten verursachen. Bei aufgebrauchtem Kontingent erscheint eine Meldung; kein automatischer Wiederholungsversuch. Die Reset-Zeit richtet sich nach dem beim Anbieter erreichten Minuten-, Tages- oder Monatslimit.
 
@@ -91,3 +91,8 @@ Je Fall notieren: richtiger Artikel, richtige Menge/Orte, sinnvolle Rückfrage, 
 Das Sprachmodell erhält den eingegebenen Text, den aktuellen Gesprächsverlauf sowie Artikel-IDs, Namen, Kategorie, Marke, Größe, Farbe, Orte und Mengen. Fotos, freie Notizen und Schlüssel werden nicht als Kontext gesendet. Der Schlüssel wird nur vom HA-Backend für den ausgewählten Anbieter verwendet; im Browser erscheint nur, ob er eingerichtet ist. Die Zusatzfunktion verändert keine Kleidungseinträge und benötigt zum Testen keine Fotos.
 
 Die Anbindung wurde mit simulierten Anbieterantworten geprüft. Ein echter Qualitäts-/Geschwindigkeitsvergleich erfolgt erst mit eingerichteten eigenen API-Schlüsseln. Kein Qualitätsgewinner ist bisher bestimmt.
+
+
+### Google AI Studio ab 0.6.3
+
+Mistral wurde durch Gemini ersetzt. Eigenen Google-AI-Studio-Schlüssel in `assistant_gemini_key` eintragen; ein alter Mistral-Schlüssel wird nicht übertragen. `assistant_gemini_model` kann leer bleiben (Standard `gemini-2.5-flash-lite`) oder ein im eigenen Projekt verfügbares Gemini-Modell enthalten. App nach dem Speichern neu starten und im Assistenten „Google AI Studio · Gemini“ auswählen. Der Schlüssel bleibt auf dem HA-Server. Die Einrichtung aktiviert keine Abrechnung und wechselt bei Modell-/Kontingentfehlern nicht auf ein anderes Modell. Verfügbarkeit und mögliche Kosten richten sich nach dem Google-Projekt. Quelle der Schnittstelle: https://ai.google.dev/gemini-api/docs/openai

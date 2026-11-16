@@ -1,5 +1,11 @@
 # Änderungen
 
+## 0.6.3
+
+- Mistral durch Google AI Studio (Gemini API) ersetzt, mit eigenem Schlüssel und optionaler Modellwahl.
+- Standardmodell gemini-2.5-flash-lite; vorhandene Mistral-Schlüssel werden nicht für Google verwendet.
+- Provider-/Schlüsseltrennung, Google-Endpunkt, JSON-Anfragen und Rückfragen in automatischen Tests geprüft.
+
 ## 0.6.2
 
 - Assistent fordert JSON-Fehlerantworten an und zeigt verständliche Meldungen statt HTML/JSON-Parserfehlern.
