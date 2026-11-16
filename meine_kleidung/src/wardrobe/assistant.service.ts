@@ -6,7 +6,7 @@ export const assistantProviders = {
   groq: { label: 'Groq', key: 'ASSISTANT_GROQ_KEY', model: 'openai/gpt-oss-20b', url: 'https://api.groq.com/openai/v1/chat/completions' },
   cloudflare: { label: 'Cloudflare', key: 'ASSISTANT_CLOUDFLARE_KEY', model: '@cf/meta/llama-3.1-8b-instruct', url: '' },
   openrouter: { label: 'OpenRouter', key: 'ASSISTANT_OPENROUTER_KEY', model: 'openrouter/free', url: 'https://openrouter.ai/api/v1/chat/completions' },
-  mistral: { label: 'Mistral', key: 'ASSISTANT_MISTRAL_KEY', model: 'mistral-small-latest', url: 'https://api.mistral.ai/v1/chat/completions' },
+  gemini: { label: 'Google AI Studio · Gemini', key: 'ASSISTANT_GEMINI_KEY', model: 'gemini-2.5-flash-lite', url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions' },
 } as const;
 type Provider = keyof typeof assistantProviders;
 type Snapshot = Awaited<ReturnType<InventoryService['snapshot']>>;

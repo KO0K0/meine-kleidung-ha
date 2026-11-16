@@ -27,8 +27,8 @@ const child = spawn(process.execPath, ['dist/main.js'], {
     ASSISTANT_CLOUDFLARE_MODEL: options.assistant_cloudflare_model || '',
     ASSISTANT_OPENROUTER_KEY: options.assistant_openrouter_key || '',
     ASSISTANT_OPENROUTER_MODEL: options.assistant_openrouter_model || '',
-    ASSISTANT_MISTRAL_KEY: options.assistant_mistral_key || '',
-    ASSISTANT_MISTRAL_MODEL: options.assistant_mistral_model || '',
+    ASSISTANT_GEMINI_KEY: options.assistant_gemini_key || '',
+    ASSISTANT_GEMINI_MODEL: options.assistant_gemini_model || '',
     ACCESS_TOKEN_SECRET: fs.readFileSync(secretPath, 'utf8') },
 });
 for (const signal of ['SIGTERM', 'SIGINT']) process.on(signal, () => child.kill(signal));

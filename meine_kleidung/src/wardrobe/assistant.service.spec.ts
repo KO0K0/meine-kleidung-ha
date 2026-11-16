@@ -24,9 +24,9 @@ describe('assistant validates model proposals against real stock', () => {
 describe('assistant provider adapters', () => {
   let oldFetch: typeof fetch;
   const oldEnv = { ...process.env };
-  beforeEach(() => { oldFetch = global.fetch; for (const p of ['GROQ','CLOUDFLARE','OPENROUTER','MISTRAL']) process.env[`ASSISTANT_${p}_KEY`] = 'test-only-key'; process.env.ASSISTANT_CLOUDFLARE_ACCOUNT = 'a'.repeat(32); });
+  beforeEach(() => { oldFetch = global.fetch; for (const p of ['GROQ','CLOUDFLARE','OPENROUTER','GEMINI']) process.env[`ASSISTANT_${p}_KEY`] = 'test-only-key'; process.env.ASSISTANT_CLOUDFLARE_ACCOUNT = 'a'.repeat(32); });
   afterEach(() => { global.fetch = oldFetch; process.env = { ...oldEnv }; });
-  it.each(['groq','cloudflare','openrouter','mistral'])('reads %s response and sends only required catalog fields', async provider => {
+  it.each(['groq','cloudflare','openrouter','gemini'])('reads %s response and sends only required catalog fields', async provider => {
     let sent: any;
     global.fetch = jest.fn(async (_url, options) => {
       sent = JSON.parse(String(options?.body));
@@ -36,6 +36,21 @@ describe('assistant provider adapters', () => {
     const answer = await service.understand({ provider, turns: [{ role: 'user', content: 'Einen Hoodie nach Vogelsgesang' }] });
     expect(answer.kind).toBe('transfer'); expect(sent.messages[0].content).not.toContain('test-only-key');
     expect(service.providers().some(p => Object.hasOwn(p, 'key'))).toBe(false);
+  });
+  it('uses the Google endpoint and Gemini model without reusing an old Mistral key', async () => {
+    delete process.env.ASSISTANT_GEMINI_KEY;
+    process.env.ASSISTANT_MISTRAL_KEY = 'old-provider-secret';
+    const service = new AssistantService({ snapshot: async () => snapshot } as any);
+    expect(service.providers().find(p => p.id === 'gemini')?.configured).toBe(false);
+    expect(service.providers().some(p => p.id === ('mistral' as any))).toBe(false);
+    process.env.ASSISTANT_GEMINI_KEY = 'google-test-key';
+    global.fetch = jest.fn(async (url, options) => {
+      expect(url).toBe('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions');
+      expect((options?.headers as any).Authorization).toBe('Bearer google-test-key');
+      expect(JSON.parse(String(options?.body))).toMatchObject({ model: 'gemini-2.5-flash-lite', response_format: { type: 'json_object' } });
+      return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ kind: 'question', question: 'Welchen Hoodie meinst du?' }) } }] }));
+    }) as any;
+    expect(await service.understand({ provider: 'gemini', turns: [{ role: 'user', content: 'Einen Hoodie waschen' }] })).toMatchObject({ kind: 'question', provider: 'gemini' });
   });
   it('handles provider quota exhaustion without retrying or exposing response secrets', async () => {
     global.fetch = jest.fn(async () => new Response('secret debug text', { status: 429 })) as any;
