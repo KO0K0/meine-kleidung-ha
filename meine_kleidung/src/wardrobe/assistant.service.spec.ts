@@ -58,4 +58,28 @@ describe('assistant provider adapters', () => {
     await expect(service.understand({ provider: 'groq', turns: [{ role: 'user', content: 'Hallo' }] })).rejects.toThrow('Anbieterlimit');
     expect(global.fetch).toHaveBeenCalledTimes(1);
   });
+  it.each([
+    [400, 'Anfrage abgelehnt'], [401, 'API-Schlüssel prüfen'], [402, 'kostenlos'],
+    [403, 'Schlüsselbeschränkungen'], [404, 'Modell oder API-Endpunkt'], [503, 'nicht verfügbar'],
+  ])('reports HTTP %s without forwarding provider text', async (status, expected) => {
+    global.fetch = jest.fn(async () => new Response('secret-key and private catalog', { status: status as number })) as any;
+    const service = new AssistantService({ snapshot: async () => snapshot } as any);
+    const error = await service.understand({ provider: 'gemini', turns: [{ role: 'user', content: 'Hallo' }] }).catch(e => e);
+    expect(error.message).toContain(`Google AI Studio · Gemini (HTTP ${status})`);
+    expect(error.message).toContain(expected);
+    expect(error.message).not.toContain('secret-key');
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+  it.each(['API_KEY_INVALID', 'API_KEY_SERVICE_BLOCKED', 'SERVICE_DISABLED', 'BILLING_DISABLED'])('translates only a known error reason: %s', async reason => {
+    global.fetch = jest.fn(async () => new Response(JSON.stringify({ error: { message: 'secret-key', details: [{ reason, metadata: { key: 'secret-key' } }] } }), { status: 400 })) as any;
+    const service = new AssistantService({ snapshot: async () => snapshot } as any);
+    const error = await service.understand({ provider: 'gemini', turns: [{ role: 'user', content: 'Hallo' }] }).catch(e => e);
+    expect(error.message).not.toContain('Anfrage abgelehnt');
+    expect(error.message).not.toContain('secret-key');
+  });
+  it('ignores unrecognized and inherited provider reasons', async () => {
+    global.fetch = jest.fn(async () => new Response(JSON.stringify({ error: { details: [{ reason: 'toString' }, { reason: 'secret-key' }] } }), { status: 400 })) as any;
+    const service = new AssistantService({ snapshot: async () => snapshot } as any);
+    await expect(service.understand({ provider: 'gemini', turns: [{ role: 'user', content: 'Hallo' }] })).rejects.toThrow('Anfrage abgelehnt');
+  });
 });

@@ -10,6 +10,36 @@ export const assistantProviders = {
 } as const;
 type Provider = keyof typeof assistantProviders;
 type Snapshot = Awaited<ReturnType<InventoryService['snapshot']>>;
+async function providerFailure(response: Response, label: string) {
+  const explanations: Record<number, string> = {
+    400: 'Anfrage abgelehnt. Modell, unterstützte Einstellungen und API-Schlüssel prüfen.',
+    401: 'Zugriff abgelehnt. API-Schlüssel prüfen.',
+    402: 'Der Anbieter verlangt Guthaben oder eine Abrechnungsfreigabe. Bitte einen kostenlos verfügbaren Anbieter wählen.',
+    403: 'Zugriff abgelehnt. API-Freigabe und Schlüsselbeschränkungen prüfen.',
+    404: 'Modell oder API-Endpunkt nicht gefunden. Modellname und Verfügbarkeit prüfen.',
+    429: 'Anbieterlimit erreicht. Bitte später erneut versuchen oder Anbieter wechseln.',
+  };
+  let explanation = explanations[response.status] || 'Der Anbieter ist gerade nicht verfügbar. Bitte später erneut versuchen oder Anbieter wechseln.';
+  // Never forward provider messages: they may contain credentials, request data or HTML.
+  // Only known machine-readable reasons are translated into our own fixed text.
+  const reasons: Record<string, string> = {
+    API_KEY_INVALID: 'Der Anbieter erkennt den API-Schlüssel nicht als gültig an.',
+    API_KEY_SERVICE_BLOCKED: 'Die Schlüsselbeschränkungen erlauben diese API nicht.',
+    SERVICE_DISABLED: 'Die benötigte API ist im Anbieterprojekt nicht aktiviert.',
+    BILLING_DISABLED: 'Der Anbieter verlangt für dieses Projekt eine Abrechnungsfreigabe. Bitte die kostenlose Modellverfügbarkeit prüfen.',
+  };
+  try {
+    const raw = await response.text();
+    if (raw.length <= 100000) {
+      const error = JSON.parse(raw)?.error;
+      if (Array.isArray(error?.details)) {
+        const reason = error.details.find((d: any) => d && Object.hasOwn(reasons, d.reason))?.reason;
+        if (reason) explanation = reasons[reason];
+      }
+    }
+  } catch { /* HTTP status remains useful even for empty or non-JSON errors. */ }
+  return new ServiceUnavailableException(`${label} (HTTP ${response.status}): ${explanation}`);
+}
 export function validateAssistantPlan(plan: any, snapshot: Snapshot) {
   if (!plan || !['question', 'query', 'transfer'].includes(plan.kind)) throw new BadRequestException('Die KI-Antwort war nicht verwendbar. Bitte anders formulieren.');
   if (plan.kind === 'question') {
@@ -66,7 +96,7 @@ Benutze ausschließlich echte IDs und Bestände. Bei mehreren möglichen Artikel
       const url = provider === 'cloudflare' ? `https://api.cloudflare.com/client/v4/accounts/${process.env.ASSISTANT_CLOUDFLARE_ACCOUNT}/ai/run/${model}` : p.url;
       if (provider === 'cloudflare' && (!/^@cf\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9._-]+$/.test(model) || model.includes('..'))) throw new BadRequestException('Ungültiges Cloudflare-Modell.');
       const response = await fetch(url, { method: 'POST', signal: AbortSignal.timeout(30000), headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ ...(provider !== 'cloudflare' ? { model } : {}), messages: [{ role: 'system', content: prompt }, ...body.turns], max_tokens: 1600, temperature: 0, ...(provider !== 'groq' ? { response_format: { type: 'json_object' } } : {}) }) });
-      if (!response.ok) throw new ServiceUnavailableException(response.status === 429 ? 'Anbieterlimit erreicht. Bitte später erneut versuchen oder Anbieter wechseln.' : response.status === 401 || response.status === 403 ? 'Anbieter hat den Zugriff abgelehnt. API-Schlüssel und Modellfreigabe prüfen.' : 'Der Anbieter ist gerade nicht verfügbar oder unterstützt diese Modelleinstellung nicht.');
+      if (!response.ok) throw await providerFailure(response, p.label);
       const raw = await response.text();
       if (raw.length > 100000) throw new BadRequestException('Die Anbieterantwort war zu groß.');
       const json = JSON.parse(raw), content = provider === 'cloudflare' ? json.result?.response : json.choices?.[0]?.message?.content;

@@ -1,5 +1,11 @@
 # Änderungen
 
+## 0.6.4
+
+- Assistent nennt bei Anbieterfehlern den Anbieter und HTTP-Status sowie konkrete Hinweise zu Modell, Zugriff, Guthaben oder Limits.
+- Bekannte API-Schlüsselfehler werden sicher übersetzt; rohe Anbieterantworten, Schlüssel und Katalogdaten werden nicht als Fehlermeldung weitergereicht.
+- Fehlerfälle einschließlich leerer/HTML-Antworten und unbekannter Fehlergründe automatisch geprüft; keine automatischen Wiederholungen.
+
 ## 0.6.3
 
 - Mistral durch Google AI Studio (Gemini API) ersetzt, mit eigenem Schlüssel und optionaler Modellwahl.
